@@ -1,30 +1,50 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+import Nav from './components/Nav.vue';
+import ResumeCompPart from './components/ResumeCompPart.vue'
+import ResumePreview from './components/ResumePreview.vue'
 </script>
 
 <template>
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
-  </div>
-  <HelloWorld msg="Vite + Vue" />
+    <div class="common-layout">
+        <el-container>
+            <el-header class="nav-wrapper">
+                <Nav></Nav>
+            </el-header>
+            <el-container>
+                <el-aside width="300px">
+                    <ResumeCompPart></ResumeCompPart>
+                </el-aside>
+                <el-main>
+                    <ResumePreview></ResumePreview>
+                </el-main>
+            </el-container>
+        </el-container>
+    </div>
 </template>
 
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+.common-layout {
+    height: 100vh;
+    overflow: hidden;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+
+.nav-wrapper {
+    width: 100vw;
+    margin: 0;
+    padding: 0;
 }
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+
+:deep(.el-container) {
+    height: 100%;
+}
+
+:deep(.el-aside) {
+    height: calc(100vh - 60px);
+    overflow: hidden;
+}
+
+:deep(.el-main) {
+    height: calc(100vh - 60px);
+    overflow: hidden;
 }
 </style>
