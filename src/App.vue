@@ -1,7 +1,32 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import Nav from './components/Nav.vue';
 import ResumeCompPart from './components/ResumeCompPart.vue'
 import ResumePreview from './components/ResumePreview.vue'
+
+const asideWidth = ref(300)
+const isDragging = ref(false)
+
+const handleMouseDown = (e: MouseEvent) => {
+    isDragging.value = true
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+}
+
+const handleMouseMove = (e: MouseEvent) => {
+    if (isDragging.value) {
+        const newWidth = e.clientX
+        if (newWidth >= 200 && newWidth <= 500) { // 限制最小和最大宽度
+            asideWidth.value = newWidth
+        }
+    }
+}
+
+const handleMouseUp = () => {
+    isDragging.value = false
+    document.removeEventListener('mousemove', handleMouseMove)
+    document.removeEventListener('mouseup', handleMouseUp)
+}
 </script>
 
 <template>
@@ -10,10 +35,11 @@ import ResumePreview from './components/ResumePreview.vue'
             <el-header class="nav-wrapper">
                 <Nav></Nav>
             </el-header>
-            <el-container>
-                <el-aside width="300px">
+            <el-container class="main-container">
+                <el-aside :width="`${asideWidth}px`" class="resize-aside">
                     <ResumeCompPart></ResumeCompPart>
                 </el-aside>
+                <div class="resize-handle" @mousedown="handleMouseDown"></div>
                 <el-main>
                     <ResumePreview></ResumePreview>
                 </el-main>
@@ -32,6 +58,33 @@ import ResumePreview from './components/ResumePreview.vue'
     width: 100vw;
     margin: 0;
     padding: 0;
+}
+
+.main-container {
+    position: relative;
+    height: calc(100vh - 60px);
+}
+
+.resize-aside {
+    transition: width 0.1s;
+    overflow: hidden;
+}
+
+.resize-handle {
+    position: absolute;
+    left: v-bind('asideWidth + "px"');
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background-color: transparent;
+    cursor: col-resize;
+    z-index: 100;
+    transition: background-color 0.3s;
+}
+
+.resize-handle:hover,
+.resize-handle:active {
+    background-color: #409eff;
 }
 
 :deep(.el-container) {

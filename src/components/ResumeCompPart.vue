@@ -1,26 +1,214 @@
 <script lang="ts" setup>
+import { ref } from 'vue'
+import type { ResumeComponent } from '../type/Resume'
+import BasicInfoPreview from './preview/BasicInfoPreview.vue'
+
+// 当前选中的组件
+const selectedComponent = ref<ResumeComponent | null>(null)
+
+// 当前激活的tab
+const activeTab = ref('components')
+
+// 组件市场数据
+const componentList: ResumeComponent[] = [
+    {
+        id: 'basic-info',
+        name: '基本信息',
+        icon: 'user',
+        type: 'basic',
+        preview: BasicInfoPreview
+    },
+    {
+        id: 'education',
+        name: '教育经历',
+        icon: 'graduation-cap',
+        type: 'education',
+        preview: null // 后续添加其他预览组件
+    },
+    {
+        id: 'work',
+        name: '工作经历',
+        icon: 'briefcase',
+        type: 'work',
+        preview: null
+    },
+    {
+        id: 'project',
+        name: '项目经历',
+        icon: 'code',
+        type: 'project',
+        preview: null
+    },
+    {
+        id: 'skills',
+        name: '技能特长',
+        icon: 'star',
+        type: 'skills',
+        preview: null
+    }
+]
+
+// 处理组件选中
+const handleComponentSelect = (component: ResumeComponent) => {
+    selectedComponent.value = component
+    activeTab.value = 'editor'
+}
+
+// 处理组件拖拽开始
+const handleDragStart = (component: ResumeComponent) => {
+    // 后续实现拖拽逻辑
+    console.log('开始拖拽:', component)
+}
 </script>
 
 <template>
-    <el-scrollbar>
-        <p v-for="item in 20" :key="item" class="scrollbar-demo-item">{{ item }}</p>
-    </el-scrollbar>
+    <div class="resume-comp-part">
+        <el-tabs v-model="activeTab">
+            <el-tab-pane label="组件市场" name="components">
+                <div class="component-market">
+                    <div
+                        v-for="component in componentList"
+                        :key="component.id"
+                        class="component-item"
+                        draggable="true"
+                        @dragstart="handleDragStart(component)"
+                        @click="handleComponentSelect(component)"
+                    >
+                        <component 
+                            v-if="component.preview" 
+                            :is="component.preview"
+                        />
+                        <div v-else class="component-placeholder">
+                            <el-icon>
+                                <component :is="component.icon" />
+                            </el-icon>
+                            <span>{{ component.name }}</span>
+                        </div>
+                    </div>
+                </div>
+            </el-tab-pane>
+            
+            <el-tab-pane label="编辑面板" name="editor">
+                <div class="editor-panel">
+                    <template v-if="selectedComponent">
+                        <div class="editor-header">
+                            <h3>{{ selectedComponent.name }}</h3>
+                        </div>
+                        <div class="editor-content">
+                            <!-- 后续添加具体的编辑表单 -->
+                            <p>编辑 {{ selectedComponent.name }} 的内容</p>
+                        </div>
+                    </template>
+                    <div v-else class="no-selection">
+                        <el-empty description="请选择一个组件进行编辑" />
+                    </div>
+                </div>
+            </el-tab-pane>
+        </el-tabs>
+    </div>
 </template>
 
 <style scoped>
-.scrollbar-demo-item {
+.resume-comp-part {
+    height: 100%;
+    padding: 10px;
+    background: #fff;
+    border-right: 1px solid #e0e0e0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.component-market {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.component-item {
+    cursor: move;
+    width: 100%;
+    min-width: 0; /* 防止内容溢出 */
+}
+
+.component-placeholder {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    background: #f5f7fa;
+    border: 1px solid #e4e7ed;
+    border-radius: 4px;
+    transition: all 0.3s;
+    width: 100%;
+    box-sizing: border-box;
+    min-width: 0; /* 防止内容溢出 */
+}
+
+.component-placeholder:hover {
+    background: #ecf5ff;
+    border-color: #409eff;
+}
+
+.component-placeholder .el-icon {
+    font-size: 16px;
+    color: #409eff;
+}
+
+.editor-panel {
+    height: 100%;
+}
+
+.editor-header {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.editor-header h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #303133;
+}
+
+.editor-content {
+    padding: 10px 0;
+}
+
+.no-selection {
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 50px;
-    margin: 10px;
-    text-align: center;
-    border-radius: 4px;
-    background: var(--el-color-primary-light-9);
-    color: var(--el-color-primary);
 }
 
-:deep(.el-scrollbar) {
-    height: 100%;
+/* 修改预览组件的样式 */
+:deep(.basic-info-preview) {
+    width: 100%;
+    min-width: 0;
+    transform: scale(0.9);
+    transform-origin: top left;
+}
+
+:deep(.basic-info-preview .preview-header h2) {
+    font-size: 14px;
+}
+
+:deep(.basic-info-preview .info-item) {
+    font-size: 12px;
+    margin-bottom: 6px;
+}
+
+:deep(.basic-info-preview .label) {
+    width: 50px;
+}
+
+:deep(.basic-info-preview .value) {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 </style>
