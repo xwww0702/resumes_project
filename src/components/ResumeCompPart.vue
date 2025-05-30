@@ -9,6 +9,11 @@ const selectedComponent = ref<ResumeComponent | null>(null)
 // 当前激活的tab
 const activeTab = ref('components')
 
+// 组件映射
+const componentMap = {
+    'BasicInfoPreview': BasicInfoPreview
+}
+
 // 组件市场数据
 const componentList: ResumeComponent[] = [
     {
@@ -16,14 +21,14 @@ const componentList: ResumeComponent[] = [
         name: '基本信息',
         icon: 'user',
         type: 'basic',
-        preview: BasicInfoPreview
+        preview: 'BasicInfoPreview'
     },
     {
         id: 'education',
         name: '教育经历',
         icon: 'graduation-cap',
         type: 'education',
-        preview: null // 后续添加其他预览组件
+        preview: null
     },
     {
         id: 'work',
@@ -55,9 +60,17 @@ const handleComponentSelect = (component: ResumeComponent) => {
 }
 
 // 处理组件拖拽开始
-const handleDragStart = (component: ResumeComponent) => {
-    // 后续实现拖拽逻辑
-    console.log('开始拖拽:', component)
+const handleDragStart = (e: DragEvent, component: ResumeComponent) => {
+    if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = 'copy'
+        // 创建一个新的组件对象，确保包含所有必要的数据
+        const componentData = {
+            ...component,
+            preview: component.preview
+        }
+        console.log('Dragging component:', componentData) // 调试日志
+        e.dataTransfer.setData('component', JSON.stringify(componentData))
+    }
 }
 </script>
 
@@ -71,13 +84,15 @@ const handleDragStart = (component: ResumeComponent) => {
                         :key="component.id"
                         class="component-item"
                         draggable="true"
-                        @dragstart="handleDragStart(component)"
+                        @dragstart="(e) => handleDragStart(e, component)"
                         @click="handleComponentSelect(component)"
                     >
-                        <component 
-                            v-if="component.preview" 
-                            :is="component.preview"
-                        />
+                        <template v-if="component.preview">
+                            <component 
+                                :is="componentMap[component.preview as keyof typeof componentMap]"
+                                class="market-preview"
+                            />
+                        </template>
                         <div v-else class="component-placeholder">
                             <el-icon>
                                 <component :is="component.icon" />
@@ -131,6 +146,11 @@ const handleDragStart = (component: ResumeComponent) => {
     cursor: move;
     width: 100%;
     min-width: 0; /* 防止内容溢出 */
+    transition: all 0.3s;
+}
+
+.component-item:hover {
+    transform: translateY(-2px);
 }
 
 .component-placeholder {
@@ -184,28 +204,41 @@ const handleDragStart = (component: ResumeComponent) => {
     justify-content: center;
 }
 
-/* 修改预览组件的样式 */
-:deep(.basic-info-preview) {
+/* 组件市场中的预览组件样式 */
+.market-preview {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 15px;
+    cursor: move;
+    transition: all 0.3s;
     width: 100%;
-    min-width: 0;
-    transform: scale(0.9);
-    transform-origin: top left;
+    box-sizing: border-box;
 }
 
-:deep(.basic-info-preview .preview-header h2) {
-    font-size: 14px;
+.market-preview:hover {
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    border-color: #409eff;
 }
 
-:deep(.basic-info-preview .info-item) {
+.market-preview :deep(.preview-header h2) {
+    font-size: 16px;
+    margin: 0 0 10px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.market-preview :deep(.info-item) {
     font-size: 12px;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
 }
 
-:deep(.basic-info-preview .label) {
-    width: 50px;
+.market-preview :deep(.label) {
+    width: 60px;
 }
 
-:deep(.basic-info-preview .value) {
+.market-preview :deep(.value) {
     flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;

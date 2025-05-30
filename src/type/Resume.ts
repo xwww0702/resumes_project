@@ -6,5 +6,5 @@ export interface ResumeComponent {
     name: string
     icon: string
     type: 'basic' | 'education' | 'work' | 'project' | 'skills'
-    preview: Component | null
+    preview: string | null
 }

@@ -26,38 +26,42 @@
 
 <style scoped>
 .basic-info-preview {
-    background: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
-    padding: 15px;
-    cursor: move;
-    transition: all 0.3s;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    margin-bottom: 40px;
+    cursor: default;
+    transition: none;
 }
 
 .basic-info-preview:hover {
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
+    transform: none;
+    box-shadow: none;
 }
 
 .preview-header h2 {
-    font-size: 16px;
+    font-size: 20px;
     color: #333;
-    margin: 0 0 10px 0;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #eee;
+    margin: 0 0 20px 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #eee;
+    font-weight: bold;
 }
 
 .info-item {
     display: flex;
-    margin-bottom: 8px;
+    margin-bottom: 15px;
 }
 
 .label {
-    width: 60px;
+    width: 80px;
     color: #666;
+    font-weight: 500;
 }
 
 .value {
     color: #333;
+    flex: 1;
 }
 </style> 

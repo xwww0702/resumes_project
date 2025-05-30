@@ -1,10 +1,83 @@
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import type { ResumeComponent } from '../type/Resume'
+import BasicInfoPreview from './preview/BasicInfoPreview.vue'
 
 const scale = ref(0.7)
 const minScale = 0.5
 const maxScale = 1.5
 const scaleStep = 0.1
+
+const resumeComponents = ref<ResumeComponent[]>([])
+
+// 组件映射
+const componentMap = {
+    'BasicInfoPreview': BasicInfoPreview
+}
+
+// 定义页面类型
+interface ResumePage {
+    components: ResumeComponent[]
+}
+
+// 静态高度分页
+const pages = computed<ResumePage[]>(() => {
+    const result: ResumePage[] = []
+    let currentPage: ResumePage = { components: [] }
+    let currentHeight = 0
+    const maxPageHeight = 297 * 3.78 - 80 // 297mm 转换为像素，减去内边距
+
+    if (resumeComponents.value.length === 0) {
+        return [{ components: [] }]
+    }
+
+    for (const component of resumeComponents.value) {
+        const componentHeight = 300 // 假定每个组件高度为100px
+        if (currentHeight + componentHeight > maxPageHeight) {
+            result.push(currentPage)
+            currentPage = { components: [component] }
+            currentHeight = componentHeight
+        } else {
+            currentPage.components.push(component)
+            currentHeight += componentHeight
+        }
+    }
+    if (currentPage.components.length > 0) {
+        result.push(currentPage)
+    }
+    return result
+})
+
+// 拖拽添加组件
+const handleDrop = (e: DragEvent) => {
+    e.preventDefault()
+    const componentData = e.dataTransfer?.getData('component')
+    if (componentData) {
+        try {
+            const component = JSON.parse(componentData) as ResumeComponent
+            if (component.preview && componentMap[component.preview as keyof typeof componentMap]) {
+                const newComponent = {
+                    ...component,
+                    id: `${component.id}-${Date.now()}`
+                }
+                resumeComponents.value.push(newComponent)
+            }
+        } catch (error) {
+            console.error('Error parsing component data:', error)
+        }
+    }
+}
+
+// 处理拖拽悬停
+const handleDragOver = (e: DragEvent) => {
+    e.preventDefault()
+    e.dataTransfer!.dropEffect = 'copy'
+}
+
+// 处理拖拽离开
+const handleDragLeave = (e: DragEvent) => {
+    e.preventDefault()
+}
 
 const zoomIn = () => {
     if (scale.value < maxScale) {
@@ -61,54 +134,31 @@ onUnmounted(() => {
                 <el-button @click="zoomOut" :disabled="scale <= minScale">
                     <el-icon><ZoomOut /></el-icon>
                 </el-button>
-                <el-button @click="resetZoom">
-                    {{ Math.round(scale * 100) }}%
-                </el-button>
+                <el-button @click="resetZoom">{{ Math.round(scale * 100) }}%</el-button>
                 <el-button @click="zoomIn" :disabled="scale >= maxScale">
                     <el-icon><ZoomIn /></el-icon>
                 </el-button>
             </el-button-group>
         </div>
-        <div class="resume-preview" :style="{ transform: `scale(${scale})`, transformOrigin: 'top center' }">
-            <div class="preview-header">
-                <h1>个人简历</h1>
-            </div>
-            <div class="preview-content">
-                <div class="basic-info">
-                    <h2>基本信息</h2>
-                    <div class="info-item">
-                        <span class="label">姓名：</span>
-                        <span class="value">张三</span>
+        <div class="preview-scale-wrapper" :style="{ transform: `scale(${scale})`, transformOrigin: 'top center' }">
+            <div class="resume-pages">
+                <div
+                    v-for="(page, index) in pages"
+                    :key="index"
+                    class="resume-preview"
+                    @drop="handleDrop"
+                    @dragover="handleDragOver"
+                    @dragleave="handleDragLeave"
+                >
+                    <div v-if="index === 0" class="preview-header">
+                        <h1>个人简历</h1>
                     </div>
-                    <div class="info-item">
-                        <span class="label">年龄：</span>
-                        <span class="value">25岁</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">电话：</span>
-                        <span class="value">138****8888</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">邮箱：</span>
-                        <span class="value">example@email.com</span>
-                    </div>
-                </div>
-                
-                <div class="education">
-                    <h2>教育经历</h2>
-                    <div class="education-item">
-                        <div class="time">2019-2023</div>
-                        <div class="school">XX大学</div>
-                        <div class="major">计算机科学与技术</div>
-                    </div>
-                </div>
-
-                <div class="experience">
-                    <h2>工作经历</h2>
-                    <div class="experience-item">
-                        <div class="time">2023-至今</div>
-                        <div class="company">XX科技有限公司</div>
-                        <div class="position">前端开发工程师</div>
+                    <div class="preview-content">
+                        <component
+                            v-for="component in page.components"
+                            :key="component.id"
+                            :is="component.preview ? componentMap[component.preview as keyof typeof componentMap] : null"
+                        />
                     </div>
                 </div>
             </div>
@@ -159,21 +209,44 @@ onUnmounted(() => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 10px 20px;
+    padding: 0 10px;
     overflow-y: auto;
     position: relative;
 }
 
+.preview-scale-wrapper {
+    width: fit-content;
+    margin: 0 auto;
+}
+
+.resume-pages {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0;
+}
+
 .resume-preview {
     background: #fff;
-    width: 210mm; /* A4纸宽度 */
-    min-height: 297mm; /* A4纸高度 */
+    width: 210mm;
+    height: 297mm;
     padding: 40px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     border-radius: 4px;
     position: relative;
-    margin: 20px 0;
-    transition: transform 0.2s ease;
+    margin: 0 auto;
+    box-sizing: border-box;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+}
+
+.preview-inner {
+    width: 100%;
+    height: 100%;
+    transform-origin: top center;
 }
 
 .preview-header {
@@ -188,59 +261,66 @@ onUnmounted(() => {
 }
 
 .preview-content {
-    max-width: 800px;
-    margin: 0 auto;
+    width: 100%;
+    height: calc(100% - 120px); /* 减去头部和padding的高度 */
+    overflow: hidden;
 }
 
-.basic-info, .education, .experience {
-    margin-bottom: 40px;
+/* 预览组件的样式覆盖 */
+:deep(.basic-info-preview) {
+    width: 100%;
+    min-width: 0;
+    transform: none;
+    transform-origin: top left;
+    border: none;
+    box-shadow: none;
+    cursor: default;
 }
 
-h2 {
+:deep(.basic-info-preview:hover) {
+    transform: none;
+    box-shadow: none;
+}
+
+:deep(.basic-info-preview .preview-header h2) {
     font-size: 20px;
-    color: #333;
     margin-bottom: 20px;
     padding-bottom: 10px;
     border-bottom: 2px solid #eee;
-    font-weight: bold;
 }
 
-.info-item {
+:deep(.basic-info-preview .info-item) {
+    font-size: 14px;
     margin-bottom: 15px;
-    display: flex;
 }
 
-.label {
+:deep(.basic-info-preview .label) {
     width: 80px;
     color: #666;
     font-weight: 500;
 }
 
-.value {
+:deep(.basic-info-preview .value) {
     color: #333;
     flex: 1;
 }
 
-.education-item, .experience-item {
-    margin-bottom: 20px;
-    padding-left: 10px;
-    border-left: 3px solid #eee;
+/* 自定义滚动条样式 */
+.resume-preview::-webkit-scrollbar {
+    width: 6px;
 }
 
-.time {
-    color: #666;
-    font-size: 14px;
-    margin-bottom: 5px;
+.resume-preview::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
 }
 
-.school, .company {
-    font-weight: bold;
-    margin: 5px 0;
-    color: #333;
+.resume-preview::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
 }
 
-.major, .position {
-    color: #666;
-    margin-top: 5px;
+.resume-preview::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 </style> 
