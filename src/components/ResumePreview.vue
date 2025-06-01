@@ -125,6 +125,13 @@ onMounted(() => {
 onUnmounted(() => {
     window.removeEventListener('wheel', handleWheel)
 })
+
+function removeComponent(id: string) {
+    const idx = resumeComponents.value.findIndex(c => c.id === id)
+    if (idx !== -1) {
+        resumeComponents.value.splice(idx, 1)
+    }
+}
 </script>
 
 <template>
@@ -150,15 +157,13 @@ onUnmounted(() => {
                     @dragover="handleDragOver"
                     @dragleave="handleDragLeave"
                 >
-                    <div v-if="index === 0" class="preview-header">
-                        <h1>个人简历</h1>
-                    </div>
                     <div class="preview-content">
-                        <component
-                            v-for="component in page.components"
-                            :key="component.id"
-                            :is="component.preview ? componentMap[component.preview as keyof typeof componentMap] : null"
-                        />
+                        <div v-for="component in page.components" :key="component.id" class="resume-component-wrapper">
+                            <component
+                                :is="component.preview ? componentMap[component.preview as keyof typeof componentMap] : null"
+                            />
+                            <button class="delete-btn" @click="removeComponent(component.id)">×</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -322,5 +327,30 @@ onUnmounted(() => {
 
 .resume-preview::-webkit-scrollbar-thumb:hover {
     background: #555;
+}
+
+.resume-component-wrapper {
+    position: relative;
+}
+.delete-btn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 10;
+    background: #f56c6c;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-size: 16px;
+    line-height: 20px;
+    cursor: pointer;
+    opacity: 0.85;
+    transition: background 0.2s, opacity 0.2s;
+}
+.delete-btn:hover {
+    background: #d93030;
+    opacity: 1;
 }
 </style> 
