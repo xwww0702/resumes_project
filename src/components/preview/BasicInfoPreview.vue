@@ -30,7 +30,7 @@
     border: none;
     border-radius: 0;
     padding: 0;
-    margin-bottom: 40px;
+    /* margin-bottom: 40px; */
     cursor: default;
     transition: none;
 }

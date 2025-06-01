@@ -1,14 +1,16 @@
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import type { ResumeComponent } from '../type/Resume'
 import BasicInfoPreview from './preview/BasicInfoPreview.vue'
-
+import {ZoomOut,ZoomIn} from '@element-plus/icons-vue'
 const scale = ref(0.7)
 const minScale = 0.5
 const maxScale = 1.5
 const scaleStep = 0.1
 
 const resumeComponents = ref<ResumeComponent[]>([])
+const componentRefs = new Map<string, HTMLElement>()
+const componentHeights = new Map<string, number>()
 
 // 组件映射
 const componentMap = {
@@ -20,20 +22,43 @@ interface ResumePage {
     components: ResumeComponent[]
 }
 
+function setComponentRef(id: string, el: HTMLElement | null) {
+    if (el) {
+        componentRefs.set(id, el)
+        const observer = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+                componentHeights.set(id, entry.contentRect.height)
+            }
+        })
+        observer.observe(el)
+    }
+}
+const resumePagesRef = ref()
+let maxPageHeight = ref(0)
+onMounted(() => {
+  nextTick(() => {
+    if (resumePagesRef.value) {
+      maxPageHeight.value = resumePagesRef.value.offsetHeight
+      console.log('页高:', maxPageHeight.value)
+    }
+  })
+})
 // 静态高度分页
 const pages = computed<ResumePage[]>(() => {
     const result: ResumePage[] = []
     let currentPage: ResumePage = { components: [] }
     let currentHeight = 0
-    const maxPageHeight = 297 * 3.78 - 80 // 297mm 转换为像素，减去内边距
+    let height = maxPageHeight.value - 60 //减去padding
+
 
     if (resumeComponents.value.length === 0) {
         return [{ components: [] }]
     }
 
     for (const component of resumeComponents.value) {
-        const componentHeight = 300 // 假定每个组件高度为100px
-        if (currentHeight + componentHeight > maxPageHeight) {
+        const componentHeight = componentHeights.get(component.id) || 185
+        
+        if (currentHeight + componentHeight > height) {
             result.push(currentPage)
             currentPage = { components: [component] }
             currentHeight = componentHeight
@@ -48,7 +73,6 @@ const pages = computed<ResumePage[]>(() => {
     return result
 })
 
-// 拖拽添加组件
 const handleDrop = (e: DragEvent) => {
     e.preventDefault()
     const componentData = e.dataTransfer?.getData('component')
@@ -61,6 +85,12 @@ const handleDrop = (e: DragEvent) => {
                     id: `${component.id}-${Date.now()}`
                 }
                 resumeComponents.value.push(newComponent)
+                nextTick(() => {
+                    const el = componentRefs.get(newComponent.id)
+                    if (el) {
+                        componentHeights.set(newComponent.id, el.offsetHeight)
+                    }
+                })
             }
         } catch (error) {
             console.error('Error parsing component data:', error)
@@ -68,13 +98,11 @@ const handleDrop = (e: DragEvent) => {
     }
 }
 
-// 处理拖拽悬停
 const handleDragOver = (e: DragEvent) => {
     e.preventDefault()
     e.dataTransfer!.dropEffect = 'copy'
 }
 
-// 处理拖拽离开
 const handleDragLeave = (e: DragEvent) => {
     e.preventDefault()
 }
@@ -95,20 +123,14 @@ const resetZoom = () => {
     scale.value = 1
 }
 
-// 处理触摸板手势
 const handleWheel = (e: WheelEvent) => {
-    // 检查是否按下了 Ctrl 键（Mac 上的 Command 键）
     if (e.ctrlKey || e.metaKey) {
         e.preventDefault()
-        
-        // 根据滚轮方向决定缩放方向
         if (e.deltaY < 0) {
-            // 向上滚动，放大
             if (scale.value < maxScale) {
                 scale.value = Math.min(scale.value + scaleStep, maxScale)
             }
         } else {
-            // 向下滚动，缩小
             if (scale.value > minScale) {
                 scale.value = Math.max(scale.value - scaleStep, minScale)
             }
@@ -116,12 +138,10 @@ const handleWheel = (e: WheelEvent) => {
     }
 }
 
-// 组件挂载时添加事件监听
 onMounted(() => {
     window.addEventListener('wheel', handleWheel, { passive: false })
 })
 
-// 组件卸载时移除事件监听
 onUnmounted(() => {
     window.removeEventListener('wheel', handleWheel)
 })
@@ -130,6 +150,8 @@ function removeComponent(id: string) {
     const idx = resumeComponents.value.findIndex(c => c.id === id)
     if (idx !== -1) {
         resumeComponents.value.splice(idx, 1)
+        componentRefs.delete(id)
+        componentHeights.delete(id)
     }
 }
 </script>
@@ -148,7 +170,7 @@ function removeComponent(id: string) {
             </el-button-group>
         </div>
         <div class="preview-scale-wrapper" :style="{ transform: `scale(${scale})`, transformOrigin: 'top center' }">
-            <div class="resume-pages">
+            <div class="resume-pages" ref="resumePagesRef">
                 <div
                     v-for="(page, index) in pages"
                     :key="index"
@@ -158,7 +180,12 @@ function removeComponent(id: string) {
                     @dragleave="handleDragLeave"
                 >
                     <div class="preview-content">
-                        <div v-for="component in page.components" :key="component.id" class="resume-component-wrapper">
+                        <div
+                            v-for="component in page.components"
+                            :key="component.id"
+                            class="resume-component-wrapper"
+                            :ref="el => setComponentRef(component.id, el as HTMLElement)"
+                        >
                             <component
                                 :is="component.preview ? componentMap[component.preview as keyof typeof componentMap] : null"
                             />
@@ -170,8 +197,8 @@ function removeComponent(id: string) {
         </div>
     </div>
 </template>
-
-<style scoped>
+<style scoped lang="less">
+@import '../_variables.less';
 .zoom-controls {
     position: sticky;
     top: 5px;
@@ -235,7 +262,7 @@ function removeComponent(id: string) {
     background: #fff;
     width: 210mm;
     height: 297mm;
-    padding: 40px;
+    padding: @resume-padding;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     border-radius: 4px;
     position: relative;
@@ -256,7 +283,7 @@ function removeComponent(id: string) {
 
 .preview-header {
     text-align: center;
-    margin-bottom: 40px;
+    // margin-bottom: 40px;
 }
 
 .preview-header h1 {
@@ -267,7 +294,7 @@ function removeComponent(id: string) {
 
 .preview-content {
     width: 100%;
-    height: calc(100% - 120px); /* 减去头部和padding的高度 */
+    height: 100%; /* 减去头部和padding的高度 */
     overflow: hidden;
 }
 
@@ -289,14 +316,14 @@ function removeComponent(id: string) {
 
 :deep(.basic-info-preview .preview-header h2) {
     font-size: 20px;
-    margin-bottom: 20px;
+    // margin-bottom: 20px;
     padding-bottom: 10px;
     border-bottom: 2px solid #eee;
 }
 
 :deep(.basic-info-preview .info-item) {
     font-size: 14px;
-    margin-bottom: 15px;
+    // margin-bottom: 15px;
 }
 
 :deep(.basic-info-preview .label) {
