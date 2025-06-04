@@ -1,8 +1,12 @@
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import type { ResumeComponent } from '../type/Resume'
-import BasicInfoPreview from './preview/BasicInfoPreview.vue'
+import CommonPreview from './preview/CommonPreview.vue'
 import {ZoomOut,ZoomIn} from '@element-plus/icons-vue'
+import { useComponentStore } from '../store/useComponentStore'
+
+const store = useComponentStore()
+
 const scale = ref(0.7)
 const minScale = 0.5
 const maxScale = 1.5
@@ -11,10 +15,10 @@ const scaleStep = 0.1
 const resumeComponents = ref<ResumeComponent[]>([])
 const componentRefs = new Map<string, HTMLElement>()
 const componentHeights = new Map<string, number>()
+const componentData = new Map<string, any>()
 
-// 组件映射
 const componentMap = {
-    'BasicInfoPreview': BasicInfoPreview
+    'CommonPreview': CommonPreview
 }
 
 // 定义页面类型
@@ -79,19 +83,17 @@ const handleDrop = (e: DragEvent) => {
     if (componentData) {
         try {
             const component = JSON.parse(componentData) as ResumeComponent
-            if (component.preview && componentMap[component.preview as keyof typeof componentMap]) {
-                const newComponent = {
-                    ...component,
-                    id: `${component.id}-${Date.now()}`
-                }
-                resumeComponents.value.push(newComponent)
-                nextTick(() => {
-                    const el = componentRefs.get(newComponent.id)
-                    if (el) {
-                        componentHeights.set(newComponent.id, el.offsetHeight)
-                    }
-                })
+            const newComponent = {
+                ...component,
+                id: `${component.type}-${Date.now()}`
             }
+            resumeComponents.value.push(newComponent)
+            nextTick(() => {
+                const el = componentRefs.get(newComponent.id)
+                if (el) {
+                    componentHeights.set(newComponent.id, el.offsetHeight)
+                }
+            })
         } catch (error) {
             console.error('Error parsing component data:', error)
         }
@@ -154,42 +156,58 @@ function removeComponent(id: string) {
         componentHeights.delete(id)
     }
 }
+
+// 更新组件数据
+const updateComponentData = (id: string, data: any) => {
+    componentData.set(id, data)
+}
+
+defineExpose({
+    updateComponentData
+})
 </script>
 
 <template>
-    <div class="resume-preview-container">
-        <div class="zoom-controls">
+    <div class="h-full bg-gray-100 flex flex-col items-center overflow-y-auto relative bg-grid">
+        <div class="sticky top-2 z-10 mb-3 bg-white/50 p-1 rounded shadow-sm backdrop-blur-sm transition-colors duration-300 hover:bg-white/90">
             <el-button-group>
-                <el-button @click="zoomOut" :disabled="scale <= minScale">
-                    <el-icon><ZoomOut /></el-icon>
+                <el-button @click="zoomOut" :disabled="scale <= minScale" class="!h-6 !text-xs">
+                    <el-icon class="!text-xs"><ZoomOut /></el-icon>
                 </el-button>
-                <el-button @click="resetZoom">{{ Math.round(scale * 100) }}%</el-button>
-                <el-button @click="zoomIn" :disabled="scale >= maxScale">
-                    <el-icon><ZoomIn /></el-icon>
+                <el-button @click="resetZoom" class="!h-6 !text-xs">{{ Math.round(scale * 100) }}%</el-button>
+                <el-button @click="zoomIn" :disabled="scale >= maxScale" class="!h-6 !text-xs">
+                    <el-icon class="!text-xs"><ZoomIn /></el-icon>
                 </el-button>
             </el-button-group>
         </div>
-        <div class="preview-scale-wrapper" :style="{ transform: `scale(${scale})`, transformOrigin: 'top center' }">
-            <div class="resume-pages" ref="resumePagesRef">
+        <div 
+            class="w-fit mx-auto origin-top"
+            :style="{ transform: `scale(${scale})` }"
+        >
+            <div class="flex flex-col gap-2" ref="resumePagesRef">
                 <div
                     v-for="(page, index) in pages"
                     :key="index"
-                    class="resume-preview"
+                    class="w-[210mm] h-[297mm] bg-white shadow-lg rounded-lg p-1 box-border relative flex flex-col"
                     @drop="handleDrop"
                     @dragover="handleDragOver"
                     @dragleave="handleDragLeave"
                 >
-                    <div class="preview-content">
+                    <div class="flex-1">
                         <div
                             v-for="component in page.components"
                             :key="component.id"
-                            class="resume-component-wrapper"
+                            class="relative"
                             :ref="el => setComponentRef(component.id, el as HTMLElement)"
                         >
-                            <component
-                                :is="component.preview ? componentMap[component.preview as keyof typeof componentMap] : null"
+                            <CommonPreview
+                                :type="component.type"
+                                :data="component.data"
                             />
-                            <button class="delete-btn" @click="removeComponent(component.id)">×</button>
+                            <button 
+                                class="absolute top-2 right-2 w-5 h-5 rounded-full bg-red-500 text-white opacity-85 hover:opacity-100 hover:bg-red-600 transition-colors flex items-center justify-center text-sm leading-none"
+                                @click="removeComponent(component.id)"
+                            >×</button>
                         </div>
                     </div>
                 </div>
@@ -197,187 +215,13 @@ function removeComponent(id: string) {
         </div>
     </div>
 </template>
-<style scoped lang="less">
-@import '../_variables.less';
-.zoom-controls {
-    position: sticky;
-    top: 5px;
-    z-index: 100;
-    margin-bottom: 10px;
-    background: rgba(255, 255, 255, 0.5);
-    padding: 3px;
-    border-radius: 3px;
-    box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s ease;
-}
 
-.zoom-controls:hover {
-    background: rgba(255, 255, 255, 0.9);
-}
-
-.zoom-controls :deep(.el-button) {
-    padding: 2px 6px;
-    font-size: 11px;
-    height: 24px;
-    line-height: 1;
-}
-
-.zoom-controls :deep(.el-button-group) {
-    display: flex;
-    align-items: center;
-}
-
-.zoom-controls :deep(.el-icon) {
-    font-size: 12px;
-}
-
-.resume-preview-container {
-    height: 100%;
-    background-color: #f5f5f5;
+<style scoped>
+/* 自定义网格背景 */
+.bg-grid {
+    @apply bg-[length:20px_20px];
     background-image: 
-        linear-gradient(rgba(200, 200, 200, 0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(200, 200, 200, 0.1) 1px, transparent 1px);
-    background-size: 20px 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0 10px;
-    overflow-y: auto;
-    position: relative;
-}
-
-.preview-scale-wrapper {
-    width: fit-content;
-    margin: 0 auto;
-}
-
-.resume-pages {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 0;
-}
-
-.resume-preview {
-    background: #fff;
-    width: 210mm;
-    height: 297mm;
-    padding: @resume-padding;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    border-radius: 4px;
-    position: relative;
-    margin: 0 auto;
-    box-sizing: border-box;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: stretch;
-}
-
-.preview-inner {
-    width: 100%;
-    height: 100%;
-    transform-origin: top center;
-}
-
-.preview-header {
-    text-align: center;
-    // margin-bottom: 40px;
-}
-
-.preview-header h1 {
-    font-size: 28px;
-    color: #333;
-    font-weight: bold;
-}
-
-.preview-content {
-    width: 100%;
-    height: 100%; /* 减去头部和padding的高度 */
-    overflow: hidden;
-}
-
-/* 预览组件的样式覆盖 */
-:deep(.basic-info-preview) {
-    width: 100%;
-    min-width: 0;
-    transform: none;
-    transform-origin: top left;
-    border: none;
-    box-shadow: none;
-    cursor: default;
-}
-
-:deep(.basic-info-preview:hover) {
-    transform: none;
-    box-shadow: none;
-}
-
-:deep(.basic-info-preview .preview-header h2) {
-    font-size: 20px;
-    // margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #eee;
-}
-
-:deep(.basic-info-preview .info-item) {
-    font-size: 14px;
-    // margin-bottom: 15px;
-}
-
-:deep(.basic-info-preview .label) {
-    width: 80px;
-    color: #666;
-    font-weight: 500;
-}
-
-:deep(.basic-info-preview .value) {
-    color: #333;
-    flex: 1;
-}
-
-/* 自定义滚动条样式 */
-.resume-preview::-webkit-scrollbar {
-    width: 6px;
-}
-
-.resume-preview::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-.resume-preview::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 3px;
-}
-
-.resume-preview::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-
-.resume-component-wrapper {
-    position: relative;
-}
-.delete-btn {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    z-index: 10;
-    background: #f56c6c;
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    width: 22px;
-    height: 22px;
-    font-size: 16px;
-    line-height: 20px;
-    cursor: pointer;
-    opacity: 0.85;
-    transition: background 0.2s, opacity 0.2s;
-}
-.delete-btn:hover {
-    background: #d93030;
-    opacity: 1;
+        linear-gradient(rgba(156, 163, 175, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(156, 163, 175, 0.1) 1px, transparent 1px);
 }
 </style> 

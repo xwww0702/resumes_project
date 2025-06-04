@@ -6,6 +6,7 @@ import ResumePreview from './components/ResumePreview.vue'
 
 const asideWidth = ref(300)
 const isDragging = ref(false)
+const previewRef = ref()
 
 const handleMouseDown = (e: MouseEvent) => {
     isDragging.value = true
@@ -27,6 +28,7 @@ const handleMouseUp = () => {
     document.removeEventListener('mousemove', handleMouseMove)
     document.removeEventListener('mouseup', handleMouseUp)
 }
+
 </script>
 
 <template>
@@ -41,7 +43,7 @@ const handleMouseUp = () => {
                 </el-aside>
                 <div class="resize-handle" @mousedown="handleMouseDown"></div>
                 <el-main>
-                    <ResumePreview></ResumePreview>
+                    <ResumePreview ref="previewRef"></ResumePreview>
                 </el-main>
             </el-container>
         </el-container>
