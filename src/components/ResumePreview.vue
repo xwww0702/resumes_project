@@ -4,22 +4,12 @@ import type { ResumeComponent } from '../type/Resume'
 import CommonPreview from './preview/CommonPreview.vue'
 import {ZoomOut,ZoomIn} from '@element-plus/icons-vue'
 import { useComponentStore } from '../store/useComponentStore'
+import  { handleWheel,zoomOut,zoomIn,resetZoom,scale,minScale,maxScale } from '../hooks/useZooms'
 
-const store = useComponentStore()
+const {resumeComponents,addComponent,removeComponent,componentRefs,componentHeights} = useComponentStore()
 
-const scale = ref(0.7)
-const minScale = 0.5
-const maxScale = 1.5
-const scaleStep = 0.1
-
-const resumeComponents = ref<ResumeComponent[]>([])
-const componentRefs = new Map<string, HTMLElement>()
-const componentHeights = new Map<string, number>()
 const componentData = new Map<string, any>()
 
-const componentMap = {
-    'CommonPreview': CommonPreview
-}
 
 // 定义页面类型
 interface ResumePage {
@@ -55,11 +45,11 @@ const pages = computed<ResumePage[]>(() => {
     let height = maxPageHeight.value - 60 //减去padding
 
 
-    if (resumeComponents.value.length === 0) {
+    if (resumeComponents.length === 0) {
         return [{ components: [] }]
     }
 
-    for (const component of resumeComponents.value) {
+    for (const component of resumeComponents) {
         const componentHeight = componentHeights.get(component.id) || 185
         
         if (currentHeight + componentHeight > height) {
@@ -77,17 +67,14 @@ const pages = computed<ResumePage[]>(() => {
     return result
 })
 
+//拖拽添加组件
 const handleDrop = (e: DragEvent) => {
     e.preventDefault()
     const componentData = e.dataTransfer?.getData('component')
     if (componentData) {
         try {
             const component = JSON.parse(componentData) as ResumeComponent
-            const newComponent = {
-                ...component,
-                id: `${component.type}-${Date.now()}`
-            }
-            resumeComponents.value.push(newComponent)
+            const newComponent = addComponent(component)
             nextTick(() => {
                 const el = componentRefs.get(newComponent.id)
                 if (el) {
@@ -109,36 +96,6 @@ const handleDragLeave = (e: DragEvent) => {
     e.preventDefault()
 }
 
-const zoomIn = () => {
-    if (scale.value < maxScale) {
-        scale.value = Math.min(scale.value + scaleStep, maxScale)
-    }
-}
-
-const zoomOut = () => {
-    if (scale.value > minScale) {
-        scale.value = Math.max(scale.value - scaleStep, minScale)
-    }
-}
-
-const resetZoom = () => {
-    scale.value = 1
-}
-
-const handleWheel = (e: WheelEvent) => {
-    if (e.ctrlKey || e.metaKey) {
-        e.preventDefault()
-        if (e.deltaY < 0) {
-            if (scale.value < maxScale) {
-                scale.value = Math.min(scale.value + scaleStep, maxScale)
-            }
-        } else {
-            if (scale.value > minScale) {
-                scale.value = Math.max(scale.value - scaleStep, minScale)
-            }
-        }
-    }
-}
 
 onMounted(() => {
     window.addEventListener('wheel', handleWheel, { passive: false })
@@ -148,18 +105,17 @@ onUnmounted(() => {
     window.removeEventListener('wheel', handleWheel)
 })
 
-function removeComponent(id: string) {
-    const idx = resumeComponents.value.findIndex(c => c.id === id)
-    if (idx !== -1) {
-        resumeComponents.value.splice(idx, 1)
-        componentRefs.delete(id)
-        componentHeights.delete(id)
-    }
-}
-
 // 更新组件数据
 const updateComponentData = (id: string, data: any) => {
     componentData.set(id, data)
+}
+
+const emit = defineEmits<{
+    (e: 'edit', component: ResumeComponent): void
+}>()
+
+const handleComponentClick = (component: ResumeComponent) => {
+    emit('edit', component)
 }
 
 defineExpose({
@@ -197,16 +153,18 @@ defineExpose({
                         <div
                             v-for="component in page.components"
                             :key="component.id"
-                            class="relative"
+                            class="relative group"
                             :ref="el => setComponentRef(component.id, el as HTMLElement)"
+                            @click="handleComponentClick(component)"
                         >
                             <CommonPreview
                                 :type="component.type"
                                 :data="component.data"
+                                class="cursor-pointer hover:ring-2 hover:ring-blue-500 hover:ring-opacity-50 transition-all duration-200"
                             />
                             <button 
-                                class="absolute top-2 right-2 w-5 h-5 rounded-full bg-red-500 text-white opacity-85 hover:opacity-100 hover:bg-red-600 transition-colors flex items-center justify-center text-sm leading-none"
-                                @click="removeComponent(component.id)"
+                                class="absolute top-2 right-2 w-5 h-5 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-85 hover:opacity-100 hover:bg-red-600 transition-colors flex items-center justify-center text-sm leading-none"
+                                @click.stop="removeComponent(component.id)"
                             >×</button>
                         </div>
                     </div>

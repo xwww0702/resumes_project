@@ -28,16 +28,27 @@ const formRef = ref()
 
 // 重置表单数据
 const resetForm = () => {
-    formData.value = {}
-    props.config.fields.forEach(field => {
-        formData.value[field.name] = ''
-    })
+    if (props.component?.data) {
+        // 如果组件有数据，使用组件数据初始化表单
+        formData.value = { ...props.component.data }
+    } else {
+        // 否则使用空值初始化
+        formData.value = {}
+        props.config.fields.forEach(field => {
+            formData.value[field.name] = ''
+        })
+    }
 }
 
 // 监听组件变化，重置表单
 watch(() => props.component, () => {
     resetForm()
 }, { immediate: true })
+
+// 监听组件数据变化
+watch(() => props.component?.data, () => {
+    resetForm()
+}, { deep: true })
 
 const submitForm = async () => {
     if (!formRef.value) return

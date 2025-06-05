@@ -10,7 +10,7 @@ export type PreviewComponentType = 'BasicInfoPreview' | null
 export interface ResumeComponent {
     id: string
     type: string
-    data: Record<string, any>
+    data?: Record<string, any>
 }
 
 // 定义组件映射接口

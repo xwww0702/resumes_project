@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import type { ResumeComponent } from './type/Resume'
 import Nav from './components/Nav.vue';
 import ResumeCompPart from './components/ResumeCompPart.vue'
 import ResumePreview from './components/ResumePreview.vue'
+import { useComponentStore } from './store/useComponentStore'
 
 const asideWidth = ref(300)
 const isDragging = ref(false)
 const previewRef = ref()
+const store = useComponentStore()
 
 const handleMouseDown = (e: MouseEvent) => {
     isDragging.value = true
@@ -17,7 +20,7 @@ const handleMouseDown = (e: MouseEvent) => {
 const handleMouseMove = (e: MouseEvent) => {
     if (isDragging.value) {
         const newWidth = e.clientX
-        if (newWidth >= 200 && newWidth <= 500) { // 限制最小和最大宽度
+        if (newWidth >= 200 && newWidth <= 500) { 
             asideWidth.value = newWidth
         }
     }
@@ -27,6 +30,10 @@ const handleMouseUp = () => {
     isDragging.value = false
     document.removeEventListener('mousemove', handleMouseMove)
     document.removeEventListener('mouseup', handleMouseUp)
+}
+
+const handleEdit = (component: ResumeComponent) => {
+    store.selectComponent(component)
 }
 
 </script>
@@ -39,11 +46,14 @@ const handleMouseUp = () => {
             </el-header>
             <el-container class="main-container">
                 <el-aside :width="`${asideWidth}px`" class="resize-aside">
-                    <ResumeCompPart></ResumeCompPart>
+                    <ResumeCompPart />
                 </el-aside>
                 <div class="resize-handle" @mousedown="handleMouseDown"></div>
                 <el-main>
-                    <ResumePreview ref="previewRef"></ResumePreview>
+                    <ResumePreview 
+                        ref="previewRef"
+                        @edit="handleEdit"
+                    />
                 </el-main>
             </el-container>
         </el-container>

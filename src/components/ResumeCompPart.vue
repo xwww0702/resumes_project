@@ -1,20 +1,26 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import type { ResumeComponent } from '../type/Resume'
 import EditPart from './EditPart.vue'
 import MarketPart from './MarketPart.vue'
+import { useComponentStore } from '../store/useComponentStore'
 
-// 当前选中的组件
-const selectedComponent = ref<ResumeComponent | null>(null)
+const store = useComponentStore()
 
 // 当前激活的tab
-const activeTab = ref('components')
+const activeTab = computed({
+    get: () => store.activeTab,
+    set: (value) => store.activeTab = value
+})
 
 // 处理组件选中
 const handleComponentSelect = (component: ResumeComponent) => {
-    selectedComponent.value = component
-    activeTab.value = 'editor'
+    store.selectComponent(component)
 }
+
+watch(()=>store.selectedComponent, (newVal) => {
+    console.log(newVal,'1133331hhhh');
+})
 </script>
 
 <template>
@@ -36,7 +42,7 @@ const handleComponentSelect = (component: ResumeComponent) => {
                 name="editor"
                 class="h-full"
             >
-                <EditPart :selected-component="selectedComponent" />
+                <EditPart :selected-component="store.selectedComponent" />
             </el-tab-pane>
         </el-tabs>
     </div>
