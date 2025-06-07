@@ -1,17 +1,15 @@
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
-import type { ResumeComponent } from '../../type/Resume'
-
-interface FormField {
-    name: string
-    label: string
-    type: 'text' | 'number' | 'email' | 'textarea'
-    placeholder?: string
-    rules?: any[]
-}
+import { ref, watch, computed } from 'vue'
+import type { ResumeComponent, FormField } from '../../type/Resume'
+import { Plus } from '@element-plus/icons-vue'
 
 interface EditorConfig {
     fields: FormField[]
+}
+
+interface UploadFile {
+    raw: File
+    name: string
 }
 
 const props = defineProps<{
@@ -21,20 +19,42 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: 'submit', data: any): void
+    (e: 'layoutChange', fields: FormField[]): void
 }>()
 
 const formData = ref<Record<string, any>>({})
 const formRef = ref()
+const fieldsConfig = ref<FormField[]>([])
+
+// 初始化字段配置
+watch(() => props.config.fields, (newFields) => {
+    fieldsConfig.value = newFields.map(field => ({
+        ...field,
+        row: field.row || 1,
+        span: field.span || 1
+    }))
+}, { immediate: true, deep: true })
+
+// 按行分组的字段
+const groupedFields = computed(() => {
+    const groups: Record<number, FormField[]> = {}
+    fieldsConfig.value.forEach(field => {
+        const row = field.row || 1
+        if (!groups[row]) {
+            groups[row] = []
+        }
+        groups[row].push(field)
+    })
+    return Object.values(groups)
+})
 
 // 重置表单数据
 const resetForm = () => {
     if (props.component?.data) {
-        // 如果组件有数据，使用组件数据初始化表单
         formData.value = { ...props.component.data }
     } else {
-        // 否则使用空值初始化
         formData.value = {}
-        props.config.fields.forEach(field => {
+        fieldsConfig.value.forEach(field => {
             formData.value[field.name] = ''
         })
     }
@@ -50,6 +70,15 @@ watch(() => props.component?.data, () => {
     resetForm()
 }, { deep: true })
 
+// 处理布局更新
+const handleLayoutChange = (field: FormField, key: 'row' | 'span', value: number) => {
+    const fieldToUpdate = fieldsConfig.value.find(f => f.name === field.name)
+    if (fieldToUpdate) {
+        fieldToUpdate[key] = value
+        emit('layoutChange', fieldsConfig.value)
+    }
+}
+
 const submitForm = async () => {
     if (!formRef.value) return
     await formRef.value.validate((valid: boolean) => {
@@ -57,6 +86,16 @@ const submitForm = async () => {
             emit('submit', formData.value)
         }
     })
+}
+
+const handleImageSuccess = (field: FormField, response: any, uploadFile: UploadFile) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+        if (e.target?.result) {
+            formData.value[field.name] = e.target.result
+        }
+    }
+    reader.readAsDataURL(uploadFile.raw)
 }
 </script>
 
@@ -68,87 +107,265 @@ const submitForm = async () => {
             label-width="80px"
             class="editor-form"
         >
-            <el-form-item
-                v-for="field in config.fields"
-                :key="field.name"
-                :label="field.label"
-                :prop="field.name"
-                :rules="field.rules"
-                class="form-item"
-            >
-                <el-input
-                    v-if="field.type === 'textarea'"
-                    v-model="formData[field.name]"
-                    type="textarea"
-                    :rows="3"
-                    :placeholder="field.placeholder"
-                    class="textarea-input"
-                ></el-input>
-                <el-input
-                    v-else
-                    v-model="formData[field.name]"
-                    :type="field.type"
-                    :placeholder="field.placeholder"
-                    class="text-input "
-                ></el-input>
-            </el-form-item>
+            <!-- 布局设置区域 -->
+            <div class="layout-settings mb-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="section-title text-sm font-medium text-gray-700 m-0">布局设置</h3>
+                    <el-tooltip content="调整字段的行号和跨列数来自定义布局" placement="top">
+                        <el-icon class="text-gray-400 cursor-help"><InfoFilled /></el-icon>
+                    </el-tooltip>
+                </div>
+                <div class="layout-grid">
+                    <div v-for="field in fieldsConfig" :key="field.name" class="layout-item">
+                        <div class="field-label text-xs text-gray-600">{{ field.label }}</div>
+                        <div class="field-controls">
+                            <div class="control-group">
+                                <label class="text-xs text-gray-500">行号</label>
+                                <el-input-number 
+                                    v-model="field.row" 
+                                    :min="1" 
+                                    :max="10"
+                                    size="small"
+                                    controls-position="right"
+                                    style="width: 100px"
+                                    class="compact-number"
+                                    @change="(value: number) => handleLayoutChange(field, 'row', value)"
+                                />
+                            </div>
+                            <div class="control-group">
+                                <label class="text-xs text-gray-500">跨列</label>
+                                <el-input-number 
+                                    v-model="field.span" 
+                                    :min="1" 
+                                    :max="3"
+                                    size="small"
+                                    controls-position="right"
+                                    style="width: 100px"
+                                    class="compact-number"
+                                    @change="(value: number) => handleLayoutChange(field, 'span', value)"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            <el-form-item>
-                <el-button 
-                    type="primary" 
-                    @click="submitForm"
-                    class="submit-button"
-                >保存</el-button>
-            </el-form-item>
+            <!-- 表单区域 -->
+            <div class="form-content">
+                <h3 class="section-title text-sm font-medium text-gray-700 mb-3">内容编辑</h3>
+                <div 
+                    v-for="(row, rowIndex) in groupedFields" 
+                    :key="rowIndex"
+                    class="form-row"
+                >
+                    <el-form-item
+                        v-for="field in row"
+                        :key="field.name"
+                        :label="field.label"
+                        :prop="field.name"
+                        :rules="field.rules"
+                        :class="[
+                            'form-item',
+                            `span-${field.span || 1}`
+                        ]"
+                    >
+                        <!-- 图片上传 -->
+                        <template v-if="field.type === 'image'">
+                            <el-upload
+                                class="image-upload"
+                                accept="image/*"
+                                :auto-upload="false"
+                                :show-file-list="false"
+                                :on-change="(file: UploadFile) => handleImageSuccess(field, null, file)"
+                            >
+                                <img 
+                                    v-if="formData[field.name]" 
+                                    :src="formData[field.name]" 
+                                    class="preview-image"
+                                >
+                                <el-icon v-else class="upload-icon"><Plus /></el-icon>
+                            </el-upload>
+                        </template>
+
+                        <!-- 文本域 -->
+                        <el-input
+                            v-else-if="field.type === 'textarea'"
+                            v-model="formData[field.name]"
+                            type="textarea"
+                            :rows="3"
+                            :placeholder="field.placeholder"
+                            class="textarea-input"
+                        />
+
+                        <!-- 普通输入框 -->
+                        <el-input
+                            v-else
+                            v-model="formData[field.name]"
+                            :type="field.type"
+                            :placeholder="field.placeholder"
+                            class="text-input"
+                        />
+                    </el-form-item>
+                </div>
+
+                <el-form-item class="submit-container">
+                    <el-button 
+                        type="primary" 
+                        @click="submitForm"
+                        class="submit-button"
+                    >保存</el-button>
+                </el-form-item>
+            </div>
         </el-form>
     </div>
 </template>
 
 <style scoped>
 .editor-container {
-    padding: 24px;
+    height: 100%;
+    overflow-y: auto;
+    padding: 20px;
 }
 
 .editor-form {
-    max-width: 36rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* 布局设置区域样式 */
+.layout-settings {
+    background-color: #f8fafc;
+    border-radius: 6px;
+    padding: 12px;
+}
+
+.layout-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.layout-item {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.field-label {
+    font-weight: 500;
+    width: 80px;
+    text-align: left;
+    font-size: 13px;
+    color: #4b5563;
+    padding-left: 4px;
+}
+
+.field-controls {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.control-group label {
+    font-size: 12px;
+    color: #6b7280;
+    width: 32px;
+}
+
+
+/* 表单内容区域样式 */
+.form-content {
+    background-color: white;
+    border-radius: 6px;
+    padding: 16px;
+    margin-top: 16px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
 }
 
 .form-item {
-    margin-bottom: 24px;
+    margin-bottom: 0;
 }
 
-.form-item:last-of-type {
-    margin-bottom: 32px;
+.form-item.span-1 {
+    grid-column: span 1;
 }
 
-.textarea-input :deep(.el-textarea__inner) {
-    box-shadow: 0 0 0 1px #dcdfe6 inset;
+.form-item.span-2 {
+    grid-column: span 2;
 }
 
-.textarea-input :deep(.el-textarea__inner:hover) {
-    box-shadow: 0 0 0 1px #c0c4cc inset;
+.form-item.span-3 {
+    grid-column: span 3;
 }
 
-.textarea-input :deep(.el-textarea__inner:focus) {
-    box-shadow: 0 0 0 1px #409eff inset;
+/* 图片上传样式 */
+.image-upload {
+    width: 100px;
+    height: 100px;
+    border: 1px dashed #d1d5db;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
 }
 
+.image-upload:hover {
+    border-color: #3b82f6;
+}
+
+.preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.upload-icon {
+    font-size: 24px;
+    color: #9ca3af;
+}
+
+/* 输入框样式 */
+.textarea-input :deep(.el-textarea__inner),
 .text-input :deep(.el-input__wrapper) {
-    box-shadow: 0 0 0 1px #dcdfe6 inset;
+    box-shadow: 0 0 0 1px #e5e7eb;
 }
 
+.textarea-input :deep(.el-textarea__inner:hover),
 .text-input :deep(.el-input__wrapper:hover) {
-    box-shadow: 0 0 0 1px #c0c4cc inset;
+    box-shadow: 0 0 0 1px #d1d5db;
 }
 
+.textarea-input :deep(.el-textarea__inner:focus),
 .text-input :deep(.el-input__wrapper.is-focus) {
-    box-shadow: 0 0 0 1px #409eff inset;
+    box-shadow: 0 0 0 1px #3b82f6;
+}
+
+/* 提交按钮样式 */
+.submit-container {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
 }
 
 .submit-button {
-    width: 96px;
-    height: 36px;
-    font-size: 14px;
-    font-weight: 500;
+    min-width: 96px;
 }
 </style> 

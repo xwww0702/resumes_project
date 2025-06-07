@@ -6,31 +6,10 @@ import ResumeCompPart from './components/ResumeCompPart.vue'
 import ResumePreview from './components/ResumePreview.vue'
 import { useComponentStore } from './store/useComponentStore'
 
-const asideWidth = ref(300)
-const isDragging = ref(false)
+const asideWidth = ref(500)
 const previewRef = ref()
 const store = useComponentStore()
 
-const handleMouseDown = (e: MouseEvent) => {
-    isDragging.value = true
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
-}
-
-const handleMouseMove = (e: MouseEvent) => {
-    if (isDragging.value) {
-        const newWidth = e.clientX
-        if (newWidth >= 200 && newWidth <= 500) { 
-            asideWidth.value = newWidth
-        }
-    }
-}
-
-const handleMouseUp = () => {
-    isDragging.value = false
-    document.removeEventListener('mousemove', handleMouseMove)
-    document.removeEventListener('mouseup', handleMouseUp)
-}
 
 const handleEdit = (component: ResumeComponent) => {
     store.selectComponent(component)
@@ -48,7 +27,7 @@ const handleEdit = (component: ResumeComponent) => {
                 <el-aside :width="`${asideWidth}px`" class="resize-aside">
                     <ResumeCompPart />
                 </el-aside>
-                <div class="resize-handle" @mousedown="handleMouseDown"></div>
+                <div class="resize-handle" ></div>
                 <el-main>
                     <ResumePreview 
                         ref="previewRef"

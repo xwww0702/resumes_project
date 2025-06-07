@@ -13,9 +13,9 @@ const store = useComponentStore()
 const { componentList } = storeToRefs(store)
 
 // 处理组件选中
-const handleComponentSelect = (component: ResumeComponent) => {
-    emit('select', component)
-}
+// const handleComponentSelect = (component: ResumeComponent) => {
+//     emit('select', component)
+// }
 
 // 处理组件拖拽开始
 const handleDragStart = (e: DragEvent, component: ResumeComponent) => {
@@ -40,8 +40,9 @@ const handleDragStart = (e: DragEvent, component: ResumeComponent) => {
                 class="cursor-move transition-transform duration-200 hover:-translate-y-1"
                 draggable="true"
                 @dragstart="(e) => handleDragStart(e, component)"
-                @click="handleComponentSelect(component)"
+                
             >
+            <!-- @click="handleComponentSelect(component)" -->
                 <CommonPreview
                     :type="component.type"
                     class="bg-white border border-gray-200 rounded-lg shadow-sm hover:border-blue-500 hover:shadow-md transition-all duration-200"

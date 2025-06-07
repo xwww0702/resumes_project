@@ -63,15 +63,19 @@ export interface FormRule {
 export interface FormField {
     name: string
     label: string
-    type: 'text' | 'number' | 'email' | 'textarea'
-    placeholder: string
-    rules: FormRule[]
+    type: 'text' | 'number' | 'email' | 'textarea' | 'image'
+    placeholder?: string
+    rules?: FormRule[]
+    span?: number // 字段占据的列数
+    row?: number // 字段所在的行
 }
 
 export interface PreviewField {
     label: string
     key: string
-    type?: 'text'
+    type?: 'text' | 'image'
+    span?: number
+    row?: number
 }
 
 export interface PreviewTemplate {

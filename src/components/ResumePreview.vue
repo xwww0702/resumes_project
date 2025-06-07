@@ -1,15 +1,15 @@
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, computed, nextTick, watch } from 'vue'
 import type { ResumeComponent } from '../type/Resume'
 import CommonPreview from './preview/CommonPreview.vue'
 import {ZoomOut,ZoomIn} from '@element-plus/icons-vue'
 import { useComponentStore } from '../store/useComponentStore'
 import  { handleWheel,zoomOut,zoomIn,resetZoom,scale,minScale,maxScale } from '../hooks/useZooms'
 
-const {resumeComponents,addComponent,removeComponent,componentRefs,componentHeights} = useComponentStore()
+const store = useComponentStore()
+const {resumeComponents,addComponent,removeComponent,componentRefs,componentHeights} = store
 
 const componentData = new Map<string, any>()
-
 
 // 定义页面类型
 interface ResumePage {
@@ -27,23 +27,25 @@ function setComponentRef(id: string, el: HTMLElement | null) {
         observer.observe(el)
     }
 }
+
 const resumePagesRef = ref()
 let maxPageHeight = ref(0)
+
 onMounted(() => {
-  nextTick(() => {
-    if (resumePagesRef.value) {
-      maxPageHeight.value = resumePagesRef.value.offsetHeight
-      console.log('页高:', maxPageHeight.value)
-    }
-  })
+    nextTick(() => {
+        if (resumePagesRef.value) {
+            maxPageHeight.value = resumePagesRef.value.offsetHeight
+            console.log('页高:', maxPageHeight.value)
+        }
+    })
 })
+
 // 静态高度分页
 const pages = computed<ResumePage[]>(() => {
     const result: ResumePage[] = []
     let currentPage: ResumePage = { components: [] }
     let currentHeight = 0
-    let height = maxPageHeight.value - 60 //减去padding
-
+    let height = maxPageHeight.value - 60 // 减去padding
 
     if (resumeComponents.length === 0) {
         return [{ components: [] }]
@@ -67,7 +69,7 @@ const pages = computed<ResumePage[]>(() => {
     return result
 })
 
-//拖拽添加组件
+// 拖拽添加组件
 const handleDrop = (e: DragEvent) => {
     e.preventDefault()
     const componentData = e.dataTransfer?.getData('component')
@@ -96,7 +98,6 @@ const handleDragLeave = (e: DragEvent) => {
     e.preventDefault()
 }
 
-
 onMounted(() => {
     window.addEventListener('wheel', handleWheel, { passive: false })
 })
@@ -117,6 +118,18 @@ const emit = defineEmits<{
 const handleComponentClick = (component: ResumeComponent) => {
     emit('edit', component)
 }
+
+// 监听组件变化，强制更新布局
+watch(() => resumeComponents, () => {
+    nextTick(() => {
+        resumeComponents.forEach(component => {
+            const el = componentRefs.get(component.id)
+            if (el) {
+                componentHeights.set(component.id, el.offsetHeight)
+            }
+        })
+    })
+}, { deep: true })
 
 defineExpose({
     updateComponentData
@@ -160,6 +173,7 @@ defineExpose({
                             <CommonPreview
                                 :type="component.type"
                                 :data="component.data"
+                                :key="component.id + JSON.stringify(component.data)"
                                 class="cursor-pointer hover:ring-2 hover:ring-blue-500 hover:ring-opacity-50 transition-all duration-200"
                             />
                             <button 
