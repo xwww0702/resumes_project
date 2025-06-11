@@ -2,7 +2,6 @@
 import type { ResumeComponent } from '../type/Resume'
 import CommonPreview from './preview/CommonPreview.vue'
 import { useComponentStore } from '../store/useComponentStore'
-import { storeToRefs } from 'pinia'
 import componentConfigs from '../config/componentConfigs'
 import { computed } from 'vue'
 
@@ -17,11 +16,11 @@ const marketComponents = computed(() => {
     return Object.entries(componentConfigs).map(([type, config]) => ({
         id: `market-${type}`,
         type: type as ResumeComponent['type'],
-        data: {
-            title: config.title
-        },
-        fields: config.defaultFields,
-        template: config
+        title: config.title,
+        fields: config.defaultFields.map(field => ({
+            ...field,
+            key: field.key || `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        }))
     }))
 })
 
@@ -29,9 +28,11 @@ const marketComponents = computed(() => {
 const handleDragStart = (e: DragEvent, component: ResumeComponent) => {
     if (e.dataTransfer) {
         e.dataTransfer.effectAllowed = 'copy'
+        // 只传递必要的组件信息
         const componentData = {
-            ...component,
-            template: componentConfigs[component.type]
+            type: component.type,
+            title: component.title,
+            fields: component.fields
         }
         e.dataTransfer.setData('component', JSON.stringify(componentData))
     }
@@ -50,7 +51,7 @@ const handleDragStart = (e: DragEvent, component: ResumeComponent) => {
             >
                 <CommonPreview
                     :type="component.type"
-                    :data="component.data"
+                    :fields="component.fields"
                     class="bg-white border border-gray-200 rounded-lg shadow-sm hover:border-blue-500 hover:shadow-md transition-all duration-200"
                 />
             </div>

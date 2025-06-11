@@ -7,10 +7,10 @@ const componentConfigs = reactive<Record<ResumeComponentType, ComponentConfig>>(
         description: '包含姓名、年龄等基本信息的组件',
         icon: 'user',
         defaultFields: [
-            { key: 'name', label: '姓名', type: 'text', span: 1, row: 1, placeholder: '请输入姓名' },
-            { key: 'age', label: '年龄', type: 'text', span: 1, row: 1, placeholder: '请输入年龄' },
-            { key: 'phone', label: '电话', type: 'text', span: 1, row: 1, placeholder: '请输入电话' },
-            { key: 'email', label: '邮箱', type: 'text', span: 1, row: 1, placeholder: '请输入邮箱' }
+            { key: 'name', label: '姓名', type: 'text', span: 1, row: 1, placeholder: '请输入姓名', value: '' },
+            { key: 'age', label: '年龄', type: 'text', span: 1, row: 1, placeholder: '请输入年龄', value: '' },
+            { key: 'phone', label: '电话', type: 'text', span: 1, row: 1, placeholder: '请输入电话', value: '' },
+            { key: 'email', label: '邮箱', type: 'text', span: 1, row: 1, placeholder: '请输入邮箱', value: '' }
         ]
     },
     image: {
@@ -18,7 +18,7 @@ const componentConfigs = reactive<Record<ResumeComponentType, ComponentConfig>>(
         description: '用于上传和显示照片的组件',
         icon: 'picture',
         defaultFields: [
-            { key: 'image', label: '照片', type: 'image', span: 1, row: 1 }
+            { key: 'image', label: '照片', type: 'image', span: 1, row: 1, placeholder: '未上传照片', value: '' }
         ]
     },
     content: {
@@ -26,8 +26,16 @@ const componentConfigs = reactive<Record<ResumeComponentType, ComponentConfig>>(
         description: '通用内容组件，可以自定义字段和布局',
         icon: 'document',
         defaultFields: [
-            { key: 'field1', label: 'field1', type: 'text', span: 2, row: 1, placeholder: '请输入内容' },
-            { key: 'field2', label: 'field2', type: 'textarea', span: 2, row: 2, placeholder: '请输入内容' }
+            { key: 'field1', label: 'field1', type: 'text', span: 2, row: 1, placeholder: '请输入内容', value: '' },
+            { key: 'field2', label: 'field2', type: 'textarea', span: 2, row: 2, placeholder: '请输入内容', value: '' }
+        ]
+    },
+    title: {
+        title: '标题组件',
+        description: '用于显示标题的组件',
+        icon: 'title',
+        defaultFields: [
+            { key: 'title', label: '标题', type: 'text', span: 1, row: 1, placeholder: '请输入标题', value: '个人信息' }
         ]
     }
 })

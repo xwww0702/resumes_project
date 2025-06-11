@@ -8,7 +8,7 @@ import { handleWheel, zoomOut, zoomIn, resetZoom, scale, minScale, maxScale } fr
 import throttle from 'lodash/throttle'
 
 const store = useComponentStore()
-const { componentList, addComponent, removeComponent, componentRefs, componentHeights } = store
+const { componentList, addComponent, removeComponent, componentRefs, componentHeights, updateComponent } = store
 
 const componentData = new Map<string, any>()
 
@@ -48,7 +48,7 @@ const computePages = (): void => {
     let currentPage: ResumePage = { components: [] }
     let currentHeight = 0
     const pageHeight = maxPageHeight.value || 297 * 3.78 // 默认A4纸高度（297mm * 3.78px/mm）
-    const minComponentHeight = 50 // 最小组件高度
+    const minComponentHeight = 20 // 最小组件高度
 
     if (componentList.length === 0) {
         pages.value = [{ components: [] }]
@@ -106,13 +106,23 @@ const handleDrop = (e: DragEvent) => {
     const componentData = e.dataTransfer?.getData('component')
     if (componentData) {
         try {
-            const component = JSON.parse(componentData) as ResumeComponent
-            if (!component.template) {
-                console.error('Component template is missing')
+            const component = JSON.parse(componentData)
+            if (!component.type) {
+                console.error('Component type is missing')
                 return
             }
             
-            let newComponent = addComponent(component.type)
+            const newComponent = addComponent(component.type)
+            if (!newComponent) {
+                console.error('Failed to create new component')
+                return
+            }
+            
+            // 更新组件数据
+            updateComponent(newComponent.id, {
+                title: component.title,
+                fields: component.fields
+            })
             
             nextTick(() => {
                 const el = componentRefs.get(newComponent.id)
@@ -154,7 +164,10 @@ const emit = defineEmits<{
 }>()
 
 const handleComponentClick = (component: ResumeComponent) => {
+    store.selectComponent(component)
     emit('edit', component)
+    console.log(component,22);
+    
 }
 
 watch(() => componentList, () => {
@@ -209,9 +222,8 @@ defineExpose({
                         >
                             <CommonPreview
                                 :type="component.type"
-                                :data="component.data"
                                 :fields="component.fields"
-                                :key="component.id + JSON.stringify(component.data)"
+                                :key="component.id"
                                 class="cursor-pointer hover:ring-2 hover:ring-blue-500 hover:ring-opacity-50 transition-all duration-200"
                             />
                             <button 

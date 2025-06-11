@@ -1,23 +1,16 @@
 <script lang="ts" setup>
-import { computed, watch } from 'vue'
-import type { ComponentData, ResumeComponentType, ComponentConfig, ComponentField } from '../../type/Resume'
-import componentConfigs from '../../config/componentConfigs'
+import { computed } from 'vue'
+import type { ResumeComponentType, ComponentField } from '../../type/Resume'
 
 const props = defineProps<{
     type: ResumeComponentType
-    data?: ComponentData
+    fields?: ComponentField[]
 }>()
-
-const componentConfig = computed(() => {
-    return componentConfigs[props.type] || {
-        defaultFields: []
-    }
-})
 
 // 按行分组的字段，确保图片字段在最右边
 const groupedFields = computed(() => {
     const groups: Record<number, ComponentField[]> = {}
-    const fields = componentConfig.value.defaultFields || []
+    const fields = props.fields || []
     
     // 首先按行分组
     fields.forEach(field => {
@@ -39,30 +32,24 @@ const groupedFields = computed(() => {
 
     return Object.values(groups)
 })
-
-// 监听模板变化
-watch(() => componentConfig.value.defaultFields, () => {
-    // 强制重新计算分组
-    groupedFields.value
-}, { deep: true })
 </script>
 
 <template>
     <div class="pl-3 pr-3 rounded-lg bg-white relative">
         <!-- 照片字段 -->
-        <template v-for="field in componentConfig.defaultFields" :key="`field-${field.key}`">
+        <template v-for="field in fields" :key="`field-${field.key}`">
             <div 
                 v-if="field.type === 'image'" 
                 class="photo-field"
             >
                 <img 
-                    v-if="data?.[field.key]" 
-                    :src="data[field.key]" 
+                    v-if="field.value" 
+                    :src="field.value" 
                     class="photo"
                     alt="个人照片"
                 >
                 <div v-else class="photo-placeholder">
-                    未上传照片
+                    {{ field.placeholder }}
                 </div>
             </div>
         </template>
@@ -83,10 +70,10 @@ watch(() => componentConfig.value.defaultFields, () => {
                     >
                         <span class="field-value">
                             <template v-if="field.type === 'text'">
-                                <div class="whitespace-pre-wrap leading-relaxed">{{ data?.[field.key] || '暂无内容' }}</div>
+                                <div class="whitespace-pre-wrap leading-relaxed">{{ field.value || field.placeholder }}</div>
                             </template>
                             <template v-else>
-                                {{ data?.[field.key] || '暂无内容' }}
+                                {{ field.value || field.placeholder }}
                             </template>
                         </span>
                     </div>

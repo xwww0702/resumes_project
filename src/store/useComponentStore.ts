@@ -1,8 +1,8 @@
 // 组件市场数据
 
 import { defineStore } from 'pinia'
-import { nextTick, ref } from 'vue'
-import type { ResumeComponent, ComponentField } from '../type/Resume'
+import { ref } from 'vue'
+import type { ResumeComponent } from '../type/Resume'
 import componentConfigs from '../config/componentConfigs'
 
 export const useComponentStore = defineStore('component', () => {
@@ -12,56 +12,49 @@ export const useComponentStore = defineStore('component', () => {
     const componentRefs = new Map<string, HTMLElement>()
     const componentHeights = new Map<string, number>()
 
-    // 添加组件
-    const addComponent = (type: ResumeComponent['type']) => {
+    function addComponent(type: ResumeComponent['type']) {
         const config = componentConfigs[type]
+        if (!config) {
+            console.error(`Component type ${type} not found`)
+            return null
+        }
+
         const newComponent: ResumeComponent = {
             id: Date.now().toString(),
             type,
-            data: {
-                title: config.title
-            },
-            fields: config.defaultFields,
-            template: config
+            title: config.title,
+            fields: config.defaultFields.map(field => ({
+                ...field,
+                key: field.key || `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+            }))
         }
+
         componentList.value.push(newComponent)
-        selectedComponent.value = newComponent
         return newComponent
-         
     }
 
-    // 更新组件
-    const updateComponent = (id: string, updates: Partial<ResumeComponent>) => {
-        const index = componentList.value.findIndex(comp => comp.id === id)
+    function updateComponent(id: string, data: Partial<ResumeComponent>) {
+        const index = componentList.value.findIndex(c => c.id === id)
         if (index !== -1) {
             componentList.value[index] = {
                 ...componentList.value[index],
-                ...updates
-            }
-            if (selectedComponent.value?.id === id) {
-                selectedComponent.value = componentList.value[index]
+                ...data
             }
         }
     }
 
-    // 删除组件
-    const removeComponent = (id: string) => {
-        const index = componentList.value.findIndex(comp => comp.id === id)
+    function removeComponent(id: string) {
+        const index = componentList.value.findIndex(c => c.id === id)
         if (index !== -1) {
             componentList.value.splice(index, 1)
-            if (selectedComponent.value?.id === id) {
-                selectedComponent.value = null
-            }
             componentRefs.delete(id)
             componentHeights.delete(id)
         }
     }
 
-    // 选择组件
-    const selectComponent = (id: string) => {
-        const component = componentList.value.find(comp => comp.id === id)
-        selectedComponent.value = component || null
-        activeTab.value = 'editor'
+    function selectComponent(component: ResumeComponent | null) {
+        console.log(component,44444);
+        selectedComponent.value = component
     }
 
     return {

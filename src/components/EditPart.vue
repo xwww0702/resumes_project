@@ -4,15 +4,10 @@ import type { ComponentField } from '../type/Resume'
 import componentConfigs from '../config/componentConfigs'
 import { useComponentStore } from '../store/useComponentStore'
 import { storeToRefs } from 'pinia'
-import FieldManager from './editor/FieldManager.vue'
+import CommonEditor from './editor/CommonEditor.vue'
 
 const store = useComponentStore()
 const { selectedComponent } = storeToRefs(store)
-
-const formData = ref({
-    title: '',
-    fields: [] as ComponentField[]
-})
 
 // 获取当前组件的编辑器配置
 const currentConfig = computed(() => {
@@ -20,60 +15,76 @@ const currentConfig = computed(() => {
     return componentConfigs[selectedComponent.value.type]
 })
 
-// 监听选中组件变化
+// // 获取当前组件的字段配置
+// const editorConfig = computed(() => {
+//     if (!selectedComponent.value) return { fields: [] }
+//     return {
+//         fields: selectedComponent.value.fields || currentConfig.value?.defaultFields || []
+//     }
+// })
+
+// 处理表单提交
+const handleSubmit = (fields: ComponentField[]) => {
+    if (selectedComponent.value) {
+        store.updateComponent(selectedComponent.value.id, {
+            fields
+        })
+    }
+}
+
+// 处理布局变更
+const handleLayoutChange = (fields: ComponentField[]) => {
+    console.log('Layout change received:', fields)
+    if (selectedComponent.value) {
+        // 确保保留所有字段属性
+        const updatedFields = fields.map(field => ({
+            ...field,
+            value: selectedComponent.value?.fields?.find(f => f.key === field.key)?.value || field.value || ''
+        }))
+        
+        store.updateComponent(selectedComponent.value.id, {
+            fields: updatedFields
+        })
+    }
+}
+
+// 监听选中组件变化，确保字段值正确初始化
 watch(selectedComponent, (newComponent) => {
-    if (newComponent) {
-        formData.value = {
-            title: newComponent.data?.title || '',
-            fields: [...(newComponent.fields || [])]
-        }
-    } else {
-        formData.value = {
-            title: '',
-            fields: []
-        }
+    console.log('Selected component changed:', newComponent)
+    if (newComponent && currentConfig.value) {
+        // 确保组件有所有必要的字段
+        const existingFields = newComponent.fields || []
+        const defaultFields = currentConfig.value.defaultFields
+        
+        // 合并现有字段和默认字段
+        const mergedFields = defaultFields.map(defaultField => {
+            const existingField = existingFields.find(f => f.key === defaultField.key)
+            return {
+                ...defaultField,
+                ...existingField,
+                value: existingField?.value || defaultField.value || ''
+            }
+        })
+        
+        // 更新组件字段
+        store.updateComponent(newComponent.id, {
+            fields: mergedFields
+        })
     }
 }, { immediate: true })
 
-// 处理标题变更
-const handleTitleChange = (newTitle: string) => {
-    if (selectedComponent.value) {
-        store.updateComponent(selectedComponent.value.id, {
-            data: {
-                ...selectedComponent.value.data,
-                title: newTitle
-            }
-        })
-    }
-}
 
-// 处理字段变更
-const handleFieldsChange = (newFields: ComponentField[]) => {
-    if (selectedComponent.value) {
-        store.updateComponent(selectedComponent.value.id, {
-            fields: newFields
-        })
-    }
-}
 </script>
 
+<!-- :config="editorConfig" -->
 <template>
     <div class="edit-part">
         <div v-if="selectedComponent" class="edit-form">
-            <el-form :model="formData" label-width="80px">
-                <el-form-item label="标题">
-                    <el-input 
-                        v-model="formData.title" 
-                        @update:modelValue="handleTitleChange"
-                    />
-                </el-form-item>
-                <el-form-item label="字段管理">
-                    <FieldManager 
-                        v-model="formData.fields" 
-                        @update:modelValue="handleFieldsChange"
-                    />
-                </el-form-item>
-            </el-form>
+            <CommonEditor
+                :component="selectedComponent"
+                @submit="handleSubmit"
+                @layoutChange="handleLayoutChange"
+            />
         </div>
         <div v-else class="no-selection">
             请选择一个组件进行编辑

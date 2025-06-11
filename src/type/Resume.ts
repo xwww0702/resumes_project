@@ -1,7 +1,7 @@
 import type { Component } from 'vue'
 
 // 组件类型
-export type ResumeComponentType = 'basic' | 'image' | 'content'
+export type ResumeComponentType = 'basic' | 'image' | 'content' | 'title'
 
 // 字段类型
 export type FieldType = 'text' | 'textarea' | 'image'
@@ -14,17 +14,19 @@ export interface ComponentField {
     key: string
     label: string
     type: FieldType
+    value?: string
     span?: number
     row?: number
     placeholder?: string
     options?: { label: string; value: string }[]
+    rules?: { required?: boolean; message?: string }[]
 }
 
 // 组件配置
 export interface ComponentConfig {
     title: string
     description: string
-    icon: string
+    icon?: string
     defaultFields: ComponentField[]
 }
 
@@ -38,7 +40,8 @@ export interface ComponentData {
 export interface ResumeComponent {
     id: string
     type: ResumeComponentType
-    data?: ComponentData
+    // data?: ComponentData
+    title?: string
     fields?: ComponentField[]
     template?: ComponentConfig
 }

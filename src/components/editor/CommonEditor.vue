@@ -1,11 +1,8 @@
 <script lang="ts" setup>
 import { ref, watch, computed } from 'vue'
-import type { ResumeComponent, FormField } from '../../type/Resume'
-import { Plus } from '@element-plus/icons-vue'
+import type { ResumeComponent, ComponentField } from '../../type/Resume'
+import { Plus, InfoFilled } from '@element-plus/icons-vue'
 
-interface EditorConfig {
-    fields: FormField[]
-}
 
 interface UploadFile {
     raw: File
@@ -14,30 +11,34 @@ interface UploadFile {
 
 const props = defineProps<{
     component: ResumeComponent | null
-    config: EditorConfig
 }>()
 
 const emit = defineEmits<{
     (e: 'submit', data: any): void
-    (e: 'layoutChange', fields: FormField[]): void
+    (e: 'layoutChange', fields: ComponentField[]): void
 }>()
 
 const formData = ref<Record<string, any>>({})
 const formRef = ref()
-const fieldsConfig = ref<FormField[]>([])
+const fieldsConfig = ref<ComponentField[]>([])
 
 // 初始化字段配置
-watch(() => props.config.fields, (newFields) => {
-    fieldsConfig.value = newFields.map(field => ({
-        ...field,
-        row: field.row || 1,
-        span: field.span || 1
-    }))
+watch(() => props.component?.fields, (newFields) => {
+    if (newFields) {
+        fieldsConfig.value = newFields.map(field => ({
+            ...field,
+            row: field.row || 1,
+            span: field.span || 1
+        }))
+        console.log('Fields initialized:', fieldsConfig.value)
+    } else {
+        fieldsConfig.value = []
+    }
 }, { immediate: true, deep: true })
 
 // 按行分组的字段
 const groupedFields = computed(() => {
-    const groups: Record<number, FormField[]> = {}
+    const groups: Record<number, ComponentField[]> = {}
     fieldsConfig.value.forEach(field => {
         const row = field.row || 1
         if (!groups[row]) {
@@ -50,13 +51,14 @@ const groupedFields = computed(() => {
 
 // 重置表单数据
 const resetForm = () => {
-    if (props.component?.data) {
-        formData.value = { ...props.component.data }
+    if (props.component?.fields) {
+        const fieldValues: Record<string, any> = {}
+        props.component.fields.forEach(field => {
+            fieldValues[field.key] = field.value || ''
+        })
+        formData.value = fieldValues
     } else {
         formData.value = {}
-        fieldsConfig.value.forEach(field => {
-            formData.value[field.name] = ''
-        })
     }
 }
 
@@ -65,17 +67,19 @@ watch(() => props.component, () => {
     resetForm()
 }, { immediate: true })
 
-// 监听组件数据变化
-watch(() => props.component?.data, () => {
+// 监听组件字段变化
+watch(() => props.component?.fields, () => {
     resetForm()
 }, { deep: true })
 
 // 处理布局更新
-const handleLayoutChange = (field: FormField, key: 'row' | 'span', value: number) => {
-    const fieldToUpdate = fieldsConfig.value.find(f => f.name === field.name)
+const handleLayoutChange = (field: ComponentField, key: 'row' | 'span', value: number) => {
+    console.log('Layout change:', field.key, key, value)
+    const fieldToUpdate = fieldsConfig.value.find(f => f.key === field.key)
     if (fieldToUpdate) {
         fieldToUpdate[key] = value
-        emit('layoutChange', fieldsConfig.value)
+        // 确保更新后的字段配置被正确传递
+        emit('layoutChange', [...fieldsConfig.value])
     }
 }
 
@@ -83,16 +87,22 @@ const submitForm = async () => {
     if (!formRef.value) return
     await formRef.value.validate((valid: boolean) => {
         if (valid) {
-            emit('submit', formData.value)
+            // 合并表单数据和布局信息
+            const submitData = fieldsConfig.value.map(field => ({
+                ...field,  // 包含所有字段属性（包括 row 和 span）
+                value: formData.value[field.key] || ''
+            }))
+            console.log('Submitting data:', submitData)
+            emit('submit', submitData)
         }
     })
 }
 
-const handleImageSuccess = (field: FormField, response: any, uploadFile: UploadFile) => {
+const handleImageSuccess = (field: ComponentField, response: any, uploadFile: UploadFile) => {
     const reader = new FileReader()
     reader.onload = (e) => {
         if (e.target?.result) {
-            formData.value[field.name] = e.target.result
+            formData.value[field.key] = e.target.result
         }
     }
     reader.readAsDataURL(uploadFile.raw)
@@ -116,7 +126,7 @@ const handleImageSuccess = (field: FormField, response: any, uploadFile: UploadF
                     </el-tooltip>
                 </div>
                 <div class="layout-grid">
-                    <div v-for="field in fieldsConfig" :key="field.name" class="layout-item">
+                    <div v-for="field in fieldsConfig" :key="field.key" class="layout-item">
                         <div class="field-label text-xs text-gray-600">{{ field.label }}</div>
                         <div class="field-controls">
                             <div class="control-group">
@@ -129,7 +139,7 @@ const handleImageSuccess = (field: FormField, response: any, uploadFile: UploadF
                                     controls-position="right"
                                     style="width: 100px"
                                     class="compact-number"
-                                    @change="(value: number) => handleLayoutChange(field, 'row', value)"
+                                    @update:modelValue="(value: number) => handleLayoutChange(field, 'row', value)"
                                 />
                             </div>
                             <div class="control-group">
@@ -142,7 +152,7 @@ const handleImageSuccess = (field: FormField, response: any, uploadFile: UploadF
                                     controls-position="right"
                                     style="width: 100px"
                                     class="compact-number"
-                                    @change="(value: number) => handleLayoutChange(field, 'span', value)"
+                                    @update:modelValue="(value: number) => handleLayoutChange(field, 'span', value)"
                                 />
                             </div>
                         </div>
@@ -160,9 +170,9 @@ const handleImageSuccess = (field: FormField, response: any, uploadFile: UploadF
                 >
                     <el-form-item
                         v-for="field in row"
-                        :key="field.name"
+                        :key="field.key"
                         :label="field.label"
-                        :prop="field.name"
+                        :prop="field.key"
                         :rules="field.rules"
                         :class="[
                             'form-item',
@@ -179,8 +189,8 @@ const handleImageSuccess = (field: FormField, response: any, uploadFile: UploadF
                                 :on-change="(file: UploadFile) => handleImageSuccess(field, null, file)"
                             >
                                 <img 
-                                    v-if="formData[field.name]" 
-                                    :src="formData[field.name]" 
+                                    v-if="formData[field.key]" 
+                                    :src="formData[field.key]" 
                                     class="preview-image"
                                 >
                                 <el-icon v-else class="upload-icon"><Plus /></el-icon>
@@ -190,7 +200,7 @@ const handleImageSuccess = (field: FormField, response: any, uploadFile: UploadF
                         <!-- 文本域 -->
                         <el-input
                             v-else-if="field.type === 'textarea'"
-                            v-model="formData[field.name]"
+                            v-model="formData[field.key]"
                             type="textarea"
                             :rows="3"
                             :placeholder="field.placeholder"
@@ -200,7 +210,7 @@ const handleImageSuccess = (field: FormField, response: any, uploadFile: UploadF
                         <!-- 普通输入框 -->
                         <el-input
                             v-else
-                            v-model="formData[field.name]"
+                            v-model="formData[field.key]"
                             :type="field.type"
                             :placeholder="field.placeholder"
                             class="text-input"
@@ -280,7 +290,6 @@ const handleImageSuccess = (field: FormField, response: any, uploadFile: UploadF
     color: #6b7280;
     width: 32px;
 }
-
 
 /* 表单内容区域样式 */
 .form-content {

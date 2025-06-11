@@ -15,11 +15,14 @@ const activeTab = computed({
 
 // 处理组件选中
 const handleComponentSelect = (component: ResumeComponent) => {
-    store.selectComponent(component.id)
+    store.selectComponent(component)
+    activeTab.value = 'editor'
 }
 
 watch(() => store.selectedComponent, (newVal) => {
-    // console.log(newVal, '1133331hhhh')
+    if (newVal) {
+        activeTab.value = 'editor'
+    }
 })
 </script>
 
@@ -42,7 +45,7 @@ watch(() => store.selectedComponent, (newVal) => {
                 name="editor"
                 class="h-full"
             >
-                <EditPart :selected-component="store.selectedComponent" />
+                <EditPart />
             </el-tab-pane>
         </el-tabs>
     </div>
