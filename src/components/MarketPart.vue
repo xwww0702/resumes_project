@@ -3,19 +3,27 @@ import type { ResumeComponent } from '../type/Resume'
 import CommonPreview from './preview/CommonPreview.vue'
 import { useComponentStore } from '../store/useComponentStore'
 import { storeToRefs } from 'pinia'
-import { componentTemplates } from '../config/componentTemplates'
+import componentConfigs from '../config/componentConfigs'
+import { computed } from 'vue'
 
 const emit = defineEmits<{
     (e: 'select', component: ResumeComponent): void
 }>()
 
 const store = useComponentStore()
-const { componentList } = storeToRefs(store)
 
-// 处理组件选中
-// const handleComponentSelect = (component: ResumeComponent) => {
-//     emit('select', component)
-// }
+// 创建市场组件列表
+const marketComponents = computed(() => {
+    return Object.entries(componentConfigs).map(([type, config]) => ({
+        id: `market-${type}`,
+        type: type as ResumeComponent['type'],
+        data: {
+            title: config.title
+        },
+        fields: config.defaultFields,
+        template: config
+    }))
+})
 
 // 处理组件拖拽开始
 const handleDragStart = (e: DragEvent, component: ResumeComponent) => {
@@ -23,9 +31,8 @@ const handleDragStart = (e: DragEvent, component: ResumeComponent) => {
         e.dataTransfer.effectAllowed = 'copy'
         const componentData = {
             ...component,
-            template: componentTemplates[component.type]
+            template: componentConfigs[component.type]
         }
-        console.log('Dragging component:', componentData)
         e.dataTransfer.setData('component', JSON.stringify(componentData))
     }
 }
@@ -35,16 +42,15 @@ const handleDragStart = (e: DragEvent, component: ResumeComponent) => {
     <div class="h-full flex flex-col">
         <div class="flex-1 overflow-y-auto px-4 py-2 space-y-4">
             <div
-                v-for="component in componentList"
+                v-for="component in marketComponents"
                 :key="component.id"
                 class="cursor-move transition-transform duration-200 hover:-translate-y-1"
                 draggable="true"
                 @dragstart="(e) => handleDragStart(e, component)"
-                
             >
-            <!-- @click="handleComponentSelect(component)" -->
                 <CommonPreview
                     :type="component.type"
+                    :data="component.data"
                     class="bg-white border border-gray-200 rounded-lg shadow-sm hover:border-blue-500 hover:shadow-md transition-all duration-200"
                 />
             </div>

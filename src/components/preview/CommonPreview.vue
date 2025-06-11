@@ -1,26 +1,26 @@
 <script lang="ts" setup>
 import { computed, watch } from 'vue'
-import type { ComponentData } from '../../type/Resume'
-import { previewTemplates } from '../../config/previewTemplates'
+import type { ComponentData, ResumeComponentType, ComponentConfig, ComponentField } from '../../type/Resume'
+import componentConfigs from '../../config/componentConfigs'
 
 const props = defineProps<{
-    type: string
+    type: ResumeComponentType
     data?: ComponentData
 }>()
 
-const previewTemplate = computed(() => {
-    return previewTemplates[props.type] || {
-        title: '',
-        fields: []
+const componentConfig = computed(() => {
+    return componentConfigs[props.type] || {
+        defaultFields: []
     }
 })
 
 // 按行分组的字段，确保图片字段在最右边
 const groupedFields = computed(() => {
-    const groups: Record<number, typeof previewTemplate.value.fields> = {}
+    const groups: Record<number, ComponentField[]> = {}
+    const fields = componentConfig.value.defaultFields || []
     
     // 首先按行分组
-    previewTemplate.value.fields.forEach(field => {
+    fields.forEach(field => {
         const row = field.row || 1
         if (!groups[row]) {
             groups[row] = []
@@ -41,7 +41,7 @@ const groupedFields = computed(() => {
 })
 
 // 监听模板变化
-watch(() => previewTemplate.value.fields, () => {
+watch(() => componentConfig.value.defaultFields, () => {
     // 强制重新计算分组
     groupedFields.value
 }, { deep: true })
@@ -50,7 +50,7 @@ watch(() => previewTemplate.value.fields, () => {
 <template>
     <div class="pl-3 pr-3 rounded-lg bg-white relative">
         <!-- 照片字段 -->
-        <template v-for="field in previewTemplate.fields" :key="`field-${field.key}`">
+        <template v-for="field in componentConfig.defaultFields" :key="`field-${field.key}`">
             <div 
                 v-if="field.type === 'image'" 
                 class="photo-field"
@@ -67,9 +67,7 @@ watch(() => previewTemplate.value.fields, () => {
             </div>
         </template>
 
-        <div class="mb-4 border-b border-gray-100 pb-1 mt-2">
-            <h2 class="text-base font-medium text-gray-800 m-0">{{ previewTemplate.title }}</h2>
-        </div>
+        <!-- 内容部分 -->
         <div class="text-sm mb-2">
             <div 
                 v-for="(row, rowIndex) in groupedFields" 
@@ -83,7 +81,6 @@ watch(() => previewTemplate.value.fields, () => {
                         class="field-item"
                         :class="[`span-${field.span || 1}`]"
                     >
-                        <span class="field-label">{{ field.label }}：</span>
                         <span class="field-value">
                             <template v-if="field.type === 'text'">
                                 <div class="whitespace-pre-wrap leading-relaxed">{{ data?.[field.key] || '暂无内容' }}</div>
@@ -114,7 +111,6 @@ watch(() => previewTemplate.value.fields, () => {
 .field-item {
     display: flex;
     align-items: flex-start;
-    gap: 4px;
 }
 
 .field-item.span-1 {
@@ -129,26 +125,22 @@ watch(() => previewTemplate.value.fields, () => {
     grid-column: span 3;
 }
 
-.field-label {
-    color: #666;
-    flex-shrink: 0;
-    text-align-last: justify;
-}
-
 .field-value {
     flex: 1;
     min-width: 0;
+    color: #333;
+    line-height: 1.5;
 }
 
 .photo-field {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    top: 0px;
+    right: 20px;
     width: 100px;
-    height: 100px;
-    overflow: hidden;
+    height: 110px;
+    overflow: visible;
     border-radius: 4px;
-    z-index: 0;
+    z-index: 1;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
 }

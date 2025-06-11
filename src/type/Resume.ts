@@ -1,16 +1,46 @@
 import type { Component } from 'vue'
 
-// 定义组件类型
-export type ResumeComponentType = 'basic' | 'education' | 'work' | 'project' | 'skills'
+// 组件类型
+export type ResumeComponentType = 'basic' | 'image' | 'content'
 
-// 定义预览组件类型
+// 字段类型
+export type FieldType = 'text' | 'textarea' | 'image'
+
+// 预览组件类型
 export type PreviewComponentType = 'BasicInfoPreview' | null
 
-// 定义组件接口
+// 组件字段
+export interface ComponentField {
+    key: string
+    label: string
+    type: FieldType
+    span?: number
+    row?: number
+    placeholder?: string
+    options?: { label: string; value: string }[]
+}
+
+// 组件配置
+export interface ComponentConfig {
+    title: string
+    description: string
+    icon: string
+    defaultFields: ComponentField[]
+}
+
+// 组件数据
+export interface ComponentData {
+    title?: string
+    [key: string]: any
+}
+
+// 简历组件
 export interface ResumeComponent {
     id: string
-    type: string
-    data?: Record<string, any>
+    type: ResumeComponentType
+    data?: ComponentData
+    fields?: ComponentField[]
+    template?: ComponentConfig
 }
 
 // 定义组件映射接口
@@ -31,23 +61,8 @@ export interface BasicInfoFormData {
     email: string
 }
 
-export interface ComponentData {
-    [key: string]: any
-}
-
-export interface ComponentField {
-    label: string
-    key: string
-    type?: 'text' | 'input' | 'date'
-}
-
 export interface ComponentTemplate {
-    title: string
     fields: ComponentField[]
-}
-
-export interface ResumeData {
-    components: ResumeComponent[]
 }
 
 export interface FormRule {
@@ -79,6 +94,6 @@ export interface PreviewField {
 }
 
 export interface PreviewTemplate {
-    title: string
     fields: PreviewField[]
 }
+

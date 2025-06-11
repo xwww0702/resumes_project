@@ -1,47 +1,54 @@
 // 组件市场数据
 
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import type { ResumeComponent } from '../type/Resume'
-import { componentTemplates } from '../config/componentTemplates'
+import { nextTick, ref } from 'vue'
+import type { ResumeComponent, ComponentField } from '../type/Resume'
+import componentConfigs from '../config/componentConfigs'
 
 export const useComponentStore = defineStore('component', () => {
-    // 组件列表
-    const componentList = ref<ResumeComponent[]>(
-        Object.entries(componentTemplates).map(([type, template]) => ({
-            id: `${type}-${Date.now()}`,
-            type,
-            data: {}
-        }))
-    )
-    const resumeComponents = ref<ResumeComponent[]>([])
-
-    // 选中的组件
+    const componentList = ref<ResumeComponent[]>([])
     const selectedComponent = ref<ResumeComponent | null>(null)
-    
-    // 当前激活的tab
     const activeTab = ref('components')
-
-
-    const addComponent = (type: ResumeComponent) => {
-        const component = {
-          ...type,
-          data: {},
-          id: `${type.type}-${Date.now()}`,
-        }
-        resumeComponents.value.push(component)
-        return component
-    }
-
     const componentRefs = new Map<string, HTMLElement>()
     const componentHeights = new Map<string, number>()
 
+    // 添加组件
+    const addComponent = (type: ResumeComponent['type']) => {
+        const config = componentConfigs[type]
+        const newComponent: ResumeComponent = {
+            id: Date.now().toString(),
+            type,
+            data: {
+                title: config.title
+            },
+            fields: config.defaultFields,
+            template: config
+        }
+        componentList.value.push(newComponent)
+        selectedComponent.value = newComponent
+        return newComponent
+         
+    }
+
+    // 更新组件
+    const updateComponent = (id: string, updates: Partial<ResumeComponent>) => {
+        const index = componentList.value.findIndex(comp => comp.id === id)
+        if (index !== -1) {
+            componentList.value[index] = {
+                ...componentList.value[index],
+                ...updates
+            }
+            if (selectedComponent.value?.id === id) {
+                selectedComponent.value = componentList.value[index]
+            }
+        }
+    }
+
     // 删除组件
     const removeComponent = (id: string) => {
-        const index = resumeComponents.value.findIndex(comp => comp.id === id)
+        const index = componentList.value.findIndex(comp => comp.id === id)
         if (index !== -1) {
-            resumeComponents.value.splice(index, 1)
-            // 如果删除的是当前选中的组件，清空选中状态
+            componentList.value.splice(index, 1)
             if (selectedComponent.value?.id === id) {
                 selectedComponent.value = null
             }
@@ -50,21 +57,10 @@ export const useComponentStore = defineStore('component', () => {
         }
     }
 
-    // 更新组件数据
-    const updateComponentData = (id: string, data: Record<string, any>) => {
-        const component = resumeComponents.value.find(comp => comp.id === id)
-        console.log(component,'111hhhhbbb');
-        
-        if (component) {
-            component.data = { ...component.data, ...data }
-        }
-        console.log(resumeComponents.value,'resumeComponents');
-        
-    }
-
-    // 选择组件并切换到编辑面板
-    const selectComponent = (component: ResumeComponent) => {
-        selectedComponent.value = component
+    // 选择组件
+    const selectComponent = (id: string) => {
+        const component = componentList.value.find(comp => comp.id === id)
+        selectedComponent.value = component || null
         activeTab.value = 'editor'
     }
 
@@ -72,12 +68,11 @@ export const useComponentStore = defineStore('component', () => {
         componentList,
         selectedComponent,
         activeTab,
-        resumeComponents,
-        addComponent,
-        removeComponent,
-        updateComponentData,
         componentRefs,
         componentHeights,
+        addComponent,
+        updateComponent,
+        removeComponent,
         selectComponent
     }
 })

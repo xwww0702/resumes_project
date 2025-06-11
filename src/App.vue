@@ -12,7 +12,7 @@ const store = useComponentStore()
 
 
 const handleEdit = (component: ResumeComponent) => {
-    store.selectComponent(component)
+    store.selectComponent(component.id)
 }
 
 </script>

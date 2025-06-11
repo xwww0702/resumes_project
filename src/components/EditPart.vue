@@ -1,91 +1,101 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
-import type { ResumeComponentType, FormField } from '../type/Resume'
-import CommonEditor from './editor/CommonEditor.vue'
-import editorConfigs from '../config/editorConfigs'
-import { componentTemplates } from '../config/componentTemplates'
-import { previewTemplates } from '../config/previewTemplates'
+import { computed, ref, watch } from 'vue'
+import type { ComponentField } from '../type/Resume'
+import componentConfigs from '../config/componentConfigs'
 import { useComponentStore } from '../store/useComponentStore'
 import { storeToRefs } from 'pinia'
+import FieldManager from './editor/FieldManager.vue'
 
 const store = useComponentStore()
 const { selectedComponent } = storeToRefs(store)
 
-// 获取当前组件的编辑器配置
-const currentConfig = computed(() => {
-    console.log(selectedComponent.value,'selectedComponent');
-    if (!selectedComponent.value) return null
-    return editorConfigs[selectedComponent.value.type as ResumeComponentType]
+const formData = ref({
+    title: '',
+    fields: [] as ComponentField[]
 })
 
-// 处理表单提交
-const handleSubmit = (data: any) => {
+// 获取当前组件的编辑器配置
+const currentConfig = computed(() => {
+    if (!selectedComponent.value) return null
+    return componentConfigs[selectedComponent.value.type]
+})
+
+// 监听选中组件变化
+watch(selectedComponent, (newComponent) => {
+    if (newComponent) {
+        formData.value = {
+            title: newComponent.data?.title || '',
+            fields: [...(newComponent.fields || [])]
+        }
+    } else {
+        formData.value = {
+            title: '',
+            fields: []
+        }
+    }
+}, { immediate: true })
+
+// 处理标题变更
+const handleTitleChange = (newTitle: string) => {
     if (selectedComponent.value) {
-        store.updateComponentData(selectedComponent.value.id, data)
+        store.updateComponent(selectedComponent.value.id, {
+            data: {
+                ...selectedComponent.value.data,
+                title: newTitle
+            }
+        })
     }
 }
 
-// 处理布局变更
-const handleLayoutChange = (fields: FormField[]) => {
+// 处理字段变更
+const handleFieldsChange = (newFields: ComponentField[]) => {
     if (selectedComponent.value) {
-        const type = selectedComponent.value.type as ResumeComponentType
-        const config = editorConfigs[type]
-        const previewConfig = previewTemplates[type]
-        
-        if (config && previewConfig) {
-            // 更新编辑器配置
-            config.fields = [...fields]
-
-            // 同步更新预览模板配置
-            previewConfig.fields = fields.map(field => ({
-                label: field.label,
-                key: field.name,
-                type: field.type === 'image' ? 'image' : 'text',
-                span: field.span || 1,
-                row: field.row || 1
-            }))
-
-            // 将布局信息存储到组件数据中
-            const currentData = selectedComponent.value.data || {}
-            store.updateComponentData(
-                selectedComponent.value.id,
-                {
-                    ...currentData,
-                    fields: fields.map(field => ({
-                        name: field.name,
-                        label: field.label,
-                        type: field.type,
-                        span: field.span || 1,
-                        row: field.row || 1,
-                        value: currentData[field.name] || ''
-                    }))
-                }
-            )
-        }
+        store.updateComponent(selectedComponent.value.id, {
+            fields: newFields
+        })
     }
 }
 </script>
 
 <template>
-    <div class="h-full p-4">
-        <template v-if="selectedComponent">
-            <h3 class="text-lg font-medium text-gray-800 mb-6 pb-2 border-b border-gray-100">
-                {{ componentTemplates[selectedComponent.type].title }}
-            </h3>
-            <CommonEditor
-                v-if="currentConfig"
-                :component="selectedComponent"
-                :config="currentConfig"
-                @submit="handleSubmit"
-                @layoutChange="handleLayoutChange"
-            />
-        </template>
-        <div v-else class="h-full flex items-center justify-center text-gray-400 text-sm">
-            请从组件市场选择一个组件进行编辑
+    <div class="edit-part">
+        <div v-if="selectedComponent" class="edit-form">
+            <el-form :model="formData" label-width="80px">
+                <el-form-item label="标题">
+                    <el-input 
+                        v-model="formData.title" 
+                        @update:modelValue="handleTitleChange"
+                    />
+                </el-form-item>
+                <el-form-item label="字段管理">
+                    <FieldManager 
+                        v-model="formData.fields" 
+                        @update:modelValue="handleFieldsChange"
+                    />
+                </el-form-item>
+            </el-form>
+        </div>
+        <div v-else class="no-selection">
+            请选择一个组件进行编辑
         </div>
     </div>
 </template>
 
 <style scoped>
+.edit-part {
+    padding: 20px;
+    height: 100%;
+    overflow-y: auto;
+}
 
+.edit-form {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.no-selection {
+    text-align: center;
+    color: #999;
+    padding: 40px;
+}
 </style>

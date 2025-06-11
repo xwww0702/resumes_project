@@ -2,12 +2,13 @@
 import { ref, onMounted, onUnmounted, computed, nextTick, watch } from 'vue'
 import type { ResumeComponent } from '../type/Resume'
 import CommonPreview from './preview/CommonPreview.vue'
-import {ZoomOut,ZoomIn} from '@element-plus/icons-vue'
+import { ZoomOut, ZoomIn } from '@element-plus/icons-vue'
 import { useComponentStore } from '../store/useComponentStore'
-import  { handleWheel,zoomOut,zoomIn,resetZoom,scale,minScale,maxScale } from '../hooks/useZooms'
+import { handleWheel, zoomOut, zoomIn, resetZoom, scale, minScale, maxScale } from '../hooks/useZooms'
+import throttle from 'lodash/throttle'
 
 const store = useComponentStore()
-const {resumeComponents,addComponent,removeComponent,componentRefs,componentHeights} = store
+const { componentList, addComponent, removeComponent, componentRefs, componentHeights } = store
 
 const componentData = new Map<string, any>()
 
@@ -16,12 +17,20 @@ interface ResumePage {
     components: ResumeComponent[]
 }
 
+// 使用 throttle 优化高度更新
+const updateComponentHeight = throttle((id: string, height: number) => {
+    if (height > 0) {
+        componentHeights.set(id, height)
+        computePages()
+    }
+}, 100)
+
 function setComponentRef(id: string, el: HTMLElement | null) {
     if (el) {
         componentRefs.set(id, el)
         const observer = new ResizeObserver((entries) => {
             for (const entry of entries) {
-                componentHeights.set(id, entry.contentRect.height)
+                updateComponentHeight(id, entry.contentRect.height)
             }
         })
         observer.observe(el)
@@ -31,30 +40,37 @@ function setComponentRef(id: string, el: HTMLElement | null) {
 const resumePagesRef = ref()
 let maxPageHeight = ref(0)
 
-onMounted(() => {
-    nextTick(() => {
-        if (resumePagesRef.value) {
-            maxPageHeight.value = resumePagesRef.value.offsetHeight
-            console.log('页高:', maxPageHeight.value)
-        }
-    })
-})
+// 计算分页
+const pages = ref<ResumePage[]>([])
 
-// 静态高度分页
-const pages = computed<ResumePage[]>(() => {
+const computePages = (): void => {
     const result: ResumePage[] = []
     let currentPage: ResumePage = { components: [] }
     let currentHeight = 0
-    let height = maxPageHeight.value - 60 // 减去padding
+    const pageHeight = maxPageHeight.value || 297 * 3.78 // 默认A4纸高度（297mm * 3.78px/mm）
+    const minComponentHeight = 50 // 最小组件高度
 
-    if (resumeComponents.length === 0) {
-        return [{ components: [] }]
+    if (componentList.length === 0) {
+        pages.value = [{ components: [] }]
+        return
     }
 
-    for (const component of resumeComponents) {
-        const componentHeight = componentHeights.get(component.id) || 185
+    for (const component of componentList) {
+        const componentHeight = componentHeights.get(component.id) || minComponentHeight
         
-        if (currentHeight + componentHeight > height) {
+        // 如果当前组件高度超过页面高度，创建新页面
+        if (componentHeight > pageHeight) {
+            if (currentPage.components.length > 0) {
+                result.push(currentPage)
+            }
+            result.push({ components: [component] })
+            currentPage = { components: [] }
+            currentHeight = 0
+            continue
+        }
+
+        // 如果添加当前组件会超出页面高度，创建新页面
+        if (currentHeight + componentHeight > pageHeight) {
             result.push(currentPage)
             currentPage = { components: [component] }
             currentHeight = componentHeight
@@ -63,24 +79,45 @@ const pages = computed<ResumePage[]>(() => {
             currentHeight += componentHeight
         }
     }
+
     if (currentPage.components.length > 0) {
         result.push(currentPage)
     }
-    return result
+
+    pages.value = result
+}
+
+const computedPages = computed<ResumePage[]>(() => {
+    computePages()
+    return pages.value
 })
 
-// 拖拽添加组件
+onMounted(() => {
+    nextTick(() => {
+        if (resumePagesRef.value) {
+            maxPageHeight.value = resumePagesRef.value.offsetHeight - 40 // 减去上下内边距和边距
+            computePages()
+        }
+    })
+})
+
 const handleDrop = (e: DragEvent) => {
     e.preventDefault()
     const componentData = e.dataTransfer?.getData('component')
     if (componentData) {
         try {
             const component = JSON.parse(componentData) as ResumeComponent
-            const newComponent = addComponent(component)
+            if (!component.template) {
+                console.error('Component template is missing')
+                return
+            }
+            
+            let newComponent = addComponent(component.type)
+            
             nextTick(() => {
                 const el = componentRefs.get(newComponent.id)
                 if (el) {
-                    componentHeights.set(newComponent.id, el.offsetHeight)
+                    updateComponentHeight(newComponent.id, el.offsetHeight)
                 }
             })
         } catch (error) {
@@ -91,7 +128,9 @@ const handleDrop = (e: DragEvent) => {
 
 const handleDragOver = (e: DragEvent) => {
     e.preventDefault()
-    e.dataTransfer!.dropEffect = 'copy'
+    if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = 'copy'
+    }
 }
 
 const handleDragLeave = (e: DragEvent) => {
@@ -106,7 +145,6 @@ onUnmounted(() => {
     window.removeEventListener('wheel', handleWheel)
 })
 
-// 更新组件数据
 const updateComponentData = (id: string, data: any) => {
     componentData.set(id, data)
 }
@@ -119,13 +157,12 @@ const handleComponentClick = (component: ResumeComponent) => {
     emit('edit', component)
 }
 
-// 监听组件变化，强制更新布局
-watch(() => resumeComponents, () => {
+watch(() => componentList, () => {
     nextTick(() => {
-        resumeComponents.forEach(component => {
+        componentList.forEach(component => {
             const el = componentRefs.get(component.id)
             if (el) {
-                componentHeights.set(component.id, el.offsetHeight)
+                updateComponentHeight(component.id, el.offsetHeight)
             }
         })
     })
@@ -153,16 +190,16 @@ defineExpose({
             class="w-fit mx-auto origin-top"
             :style="{ transform: `scale(${scale})` }"
         >
-            <div class="flex flex-col gap-2" ref="resumePagesRef">
+            <div class="flex flex-col" ref="resumePagesRef">
                 <div
-                    v-for="(page, index) in pages"
+                    v-for="(page, index) in computedPages"
                     :key="index"
-                    class="w-[210mm] h-[297mm] bg-white shadow-lg rounded-lg p-1 box-border relative flex flex-col"
+                    class="w-[210mm] h-[297mm] bg-white shadow-lg rounded-lg p-5 box-border relative flex flex-col"
                     @drop="handleDrop"
                     @dragover="handleDragOver"
                     @dragleave="handleDragLeave"
                 >
-                    <div class="flex-1">
+                    <div class="flex-1 flex flex-col">
                         <div
                             v-for="component in page.components"
                             :key="component.id"
@@ -173,6 +210,7 @@ defineExpose({
                             <CommonPreview
                                 :type="component.type"
                                 :data="component.data"
+                                :fields="component.fields"
                                 :key="component.id + JSON.stringify(component.data)"
                                 class="cursor-pointer hover:ring-2 hover:ring-blue-500 hover:ring-opacity-50 transition-all duration-200"
                             />
@@ -189,7 +227,6 @@ defineExpose({
 </template>
 
 <style scoped>
-/* 自定义网格背景 */
 .bg-grid {
     @apply bg-[length:20px_20px];
     background-image: 

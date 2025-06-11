@@ -15,11 +15,11 @@ const activeTab = computed({
 
 // 处理组件选中
 const handleComponentSelect = (component: ResumeComponent) => {
-    store.selectComponent(component)
+    store.selectComponent(component.id)
 }
 
-watch(()=>store.selectedComponent, (newVal) => {
-    console.log(newVal,'1133331hhhh');
+watch(() => store.selectedComponent, (newVal) => {
+    // console.log(newVal, '1133331hhhh')
 })
 </script>
 
