@@ -166,7 +166,6 @@ const emit = defineEmits<{
 const handleComponentClick = (component: ResumeComponent) => {
     store.selectComponent(component)
     emit('edit', component)
-    console.log(component,22);
     
 }
 

@@ -53,7 +53,6 @@ export const useComponentStore = defineStore('component', () => {
     }
 
     function selectComponent(component: ResumeComponent | null) {
-        console.log(component,44444);
         selectedComponent.value = component
     }
 

@@ -25,6 +25,7 @@ const currentConfig = computed(() => {
 
 // 处理表单提交
 const handleSubmit = (fields: ComponentField[]) => {
+    
     if (selectedComponent.value) {
         store.updateComponent(selectedComponent.value.id, {
             fields
@@ -34,7 +35,6 @@ const handleSubmit = (fields: ComponentField[]) => {
 
 // 处理布局变更
 const handleLayoutChange = (fields: ComponentField[]) => {
-    console.log('Layout change received:', fields)
     if (selectedComponent.value) {
         // 确保保留所有字段属性
         const updatedFields = fields.map(field => ({
@@ -50,7 +50,6 @@ const handleLayoutChange = (fields: ComponentField[]) => {
 
 // 监听选中组件变化，确保字段值正确初始化
 watch(selectedComponent, (newComponent) => {
-    console.log('Selected component changed:', newComponent)
     if (newComponent && currentConfig.value) {
         // 确保组件有所有必要的字段
         const existingFields = newComponent.fields || []
