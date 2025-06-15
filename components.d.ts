@@ -42,6 +42,7 @@ declare module 'vue' {
     ElUpload: typeof import('element-plus/es')['ElUpload']
     FieldManager: typeof import('./src/components/editor/FieldManager.vue')['default']
     ImageEditor: typeof import('./src/components/editor/ImageEditor.vue')['default']
+    ImagePreview: typeof import('./src/components/preview/ImagePreview.vue')['default']
     Layout: typeof import('./src/components/editor/Layout.vue')['default']
     MarketPart: typeof import('./src/components/MarketPart.vue')['default']
     Nav: typeof import('./src/components/Nav.vue')['default']

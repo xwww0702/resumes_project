@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { ResumeComponent } from '../type/Resume'
 import CommonPreview from './preview/CommonPreview.vue'
-import { useComponentStore } from '../store/useComponentStore'
+// import { useComponentStore } from '../store/useComponentStore'
 import componentConfigs from '../config/componentConfigs'
 import { computed } from 'vue'
 
@@ -9,7 +9,7 @@ const emit = defineEmits<{
     (e: 'select', component: ResumeComponent): void
 }>()
 
-const store = useComponentStore()
+// const store = useComponentStore()
 
 // 创建市场组件列表
 const marketComponents = computed(() => {
@@ -49,10 +49,18 @@ const handleDragStart = (e: DragEvent, component: ResumeComponent) => {
                 draggable="true"
                 @dragstart="(e) => handleDragStart(e, component)"
             >
-                <CommonPreview
+                <CommonPreview 
+                    v-if="component.type!=='image'"
                     :type="component.type"
                     :fields="component.fields"
                     class="bg-white border border-gray-200 rounded-lg shadow-sm hover:border-blue-500 hover:shadow-md transition-all duration-200"
+                />
+                <ImagePreview
+                    v-if="component.type==='image'"
+                    :type="component.type"
+                    :fields="component.fields"
+                    class="bg-white border border-gray-200 rounded-lg shadow-sm hover:border-blue-500 hover:shadow-md transition-all duration-200"
+               
                 />
             </div>
         </div>

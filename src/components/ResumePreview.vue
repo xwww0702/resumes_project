@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted, computed, nextTick, watch } from 'vue'
 import type { ResumeComponent } from '../type/Resume'
 import CommonPreview from './preview/CommonPreview.vue'
+import ImagePreview from './preview/ImagePreview.vue'
 import { ZoomOut, ZoomIn } from '@element-plus/icons-vue'
 import { useComponentStore } from '../store/useComponentStore'
 import { handleWheel, zoomOut, zoomIn, resetZoom, scale, minScale, maxScale } from '../hooks/useZooms'
@@ -220,9 +221,17 @@ defineExpose({
                             @click="handleComponentClick(component)"
                         >
                             <CommonPreview
+                                v-if="component.type !== 'image'"
                                 :type="component.type"
                                 :fields="component.fields"
-                                :key="component.id"
+                                :key="`common-${component.id}`"
+                                class="cursor-pointer hover:ring-2 hover:ring-blue-500 hover:ring-opacity-50 transition-all duration-200"
+                            />
+                            <ImagePreview
+                                v-if="component.type === 'image'"
+                                :type="component.type"
+                                :fields="component.fields"
+                                :key="`image-${component.id}`"
                                 class="cursor-pointer hover:ring-2 hover:ring-blue-500 hover:ring-opacity-50 transition-all duration-200"
                             />
                             <button 

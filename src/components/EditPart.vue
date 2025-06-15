@@ -15,13 +15,6 @@ const currentConfig = computed(() => {
     return componentConfigs[selectedComponent.value.type]
 })
 
-// // 获取当前组件的字段配置
-// const editorConfig = computed(() => {
-//     if (!selectedComponent.value) return { fields: [] }
-//     return {
-//         fields: selectedComponent.value.fields || currentConfig.value?.defaultFields || []
-//     }
-// })
 
 // 处理表单提交
 const handleSubmit = (fields: ComponentField[]) => {

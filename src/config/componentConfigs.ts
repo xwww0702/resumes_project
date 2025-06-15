@@ -18,7 +18,13 @@ const componentConfigs = reactive<Record<ResumeComponentType, ComponentConfig>>(
         description: '用于上传和显示照片的组件',
         icon: 'picture',
         defaultFields: [
-            { key: 'image', label: '照片', type: 'image', span: 1, row: 1, placeholder: '未上传照片', value: '' }
+            { key: 'image', label: '照片', type: 'image', span: 1, row: 1, placeholder: '未上传照片', value: '' },
+            { key: 'name', label: '姓名', type: 'text', span: 1, row: 1, placeholder: '请输入姓名', value: '' },
+            { key: 'age', label: '年龄', type: 'text', span: 1, row: 1, placeholder: '请输入年龄', value: '' },
+            { key: 'nation', label: '民族', type: 'text', span: 1, row: 1, placeholder: '请输入民族', value: '' },
+            { key: 'place', label: '籍贯', type: 'text', span: 1, row: 1, placeholder: '请输入籍贯', value: '' },
+            { key: 'phone', label: '电话', type: 'text', span: 1, row: 1, placeholder: '请输入邮箱', value: '' },
+            { key: 'email', label: '邮箱', type: 'text', span: 1, row: 1, placeholder: '请输入邮箱', value: '' },
         ]
     },
     content: {
