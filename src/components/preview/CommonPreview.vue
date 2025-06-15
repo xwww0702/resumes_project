@@ -7,12 +7,10 @@ const props = defineProps<{
     fields?: ComponentField[]
 }>()
 
-// 按行分组的字段，确保图片字段在最右边
 const groupedFields = computed(() => {
     const groups: Record<number, ComponentField[]> = {}
     const fields = props.fields || []
     
-    // 首先按行分组
     fields.forEach(field => {
         const row = field.row || 1
         if (!groups[row]) {
@@ -21,7 +19,6 @@ const groupedFields = computed(() => {
         groups[row].push({...field})
     })
 
-    // 对每一行的字段进行排序，图片字段放在最后
     Object.values(groups).forEach(row => {
         row.sort((a, b) => {
             if (a.type === 'image' && b.type !== 'image') return 1
@@ -32,15 +29,19 @@ const groupedFields = computed(() => {
 
     return Object.values(groups)
 })
+
+const getImageAlignment = (field: ComponentField) => {
+    return field.alignment || 'left'
+}
 </script>
 
 <template>
     <div class="pl-3 pr-3 rounded-lg bg-white relative">
-        <!-- 照片字段 -->
         <template v-for="field in fields" :key="`field-${field.key}`">
             <div 
                 v-if="field.type === 'image'" 
                 class="photo-field"
+                :class="getImageAlignment(field) === 'right' ? 'right-0' : 'left-0'"
             >
                 <img 
                     v-if="field.value" 
@@ -54,15 +55,13 @@ const groupedFields = computed(() => {
             </div>
         </template>
 
-        <!-- 内容部分 -->
-        <div class="text-sm mb-2">
+        <div class="text-sm mb-1">
             <div 
                 v-for="(row, rowIndex) in groupedFields" 
                 :key="`row-${rowIndex}-${row.length}`"
                 class="preview-row"
             >
                 <template v-for="field in row" :key="`field-${field.key}-${field.row}-${field.span}`">
-                    <!-- 文本字段 -->
                     <div 
                         v-if="field.type !== 'image'"
                         class="field-item"
@@ -88,7 +87,7 @@ const groupedFields = computed(() => {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
 .preview-row:last-child {
@@ -122,7 +121,6 @@ const groupedFields = computed(() => {
 .photo-field {
     position: absolute;
     top: 0px;
-    right: 20px;
     width: 100px;
     height: 110px;
     overflow: visible;

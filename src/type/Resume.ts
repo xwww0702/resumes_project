@@ -20,6 +20,8 @@ export interface ComponentField {
     placeholder?: string
     options?: { label: string; value: string }[]
     rules?: { required?: boolean; message?: string }[]
+    editable?: boolean
+    alignment?: 'left' | 'right'
 }
 
 // 组件配置

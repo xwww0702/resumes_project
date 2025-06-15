@@ -1,12 +1,8 @@
 <script setup lang='ts'>
-import { Plus } from '@element-plus/icons-vue'
 import type { ComponentField } from '../../type/Resume';
 import type { FormInstance } from 'element-plus'
+import ImageEditor from './ImageEditor.vue'
 
-interface UploadFile {
-    raw: File
-    name: string
-}
 
 const props = defineProps<{
     formRef: { value: FormInstance | undefined },
@@ -31,6 +27,22 @@ const handleInputChange = (field: ComponentField, value: string) => {
     emit('submit', updatedFields)
 }
 
+// 处理图片更新
+const handleImageUpdate = (field: ComponentField, value: string, alignment?: 'left' | 'right') => {
+    props.formData[field.key] = value
+    const updatedFields = props.fieldsConfig.map(f => {
+        if (f.key === field.key) {
+            return { 
+                ...f, 
+                value,
+                alignment: alignment || f.alignment || 'left'
+            }
+        }
+        return f
+    })
+    emit('submit', updatedFields)
+}
+
 const submitForm = async () => {
     if (!props.formRef?.value) return
     await props.formRef.value.validate((valid: boolean) => {
@@ -42,25 +54,6 @@ const submitForm = async () => {
             emit('submit', updatedFields)
         }
     })
-}
-
-const handleImageSuccess = (field: ComponentField, response: any, uploadFile: UploadFile) => {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-        const result = e.target?.result
-        if (result && typeof result === 'string') {
-            props.formData[field.key] = result
-            // 立即提交更新
-            const updatedFields = props.fieldsConfig.map(f => {
-                if (f.key === field.key) {
-                    return { ...f, value: result }
-                }
-                return f
-            })
-            emit('submit', updatedFields)
-        }
-    }
-    reader.readAsDataURL(uploadFile.raw)
 }
 </script>
 
@@ -79,25 +72,15 @@ const handleImageSuccess = (field: ComponentField, response: any, uploadFile: Up
                         :prop="config.key"
                         :rules="config.rules"
                     >
-                        <!-- 图片上传 -->
                         <template v-if="config.type === 'image'">
-                            <el-upload
-                                class="image-upload"
-                                accept="image/*"
-                                :auto-upload="false"
-                                :show-file-list="false"
-                                :on-change="(file: UploadFile) => handleImageSuccess(config, null, file)"
-                            >
-                                <img 
-                                    v-if="formData[config.key]" 
-                                    :src="formData[config.key]" 
-                                    class="preview-image"
-                                >
-                                <el-icon v-else class="upload-icon"><Plus /></el-icon>
-                            </el-upload>
+                            <ImageEditor
+                                :field="config"
+                                :value="formData[config.key]"
+                                @update="(value: string) => handleImageUpdate(config, value)"
+                                @update:alignment="(alignment: 'left' | 'right') => handleImageUpdate(config, formData[config.key], alignment)"
+                            />
                         </template>
 
-                        <!-- 文本域 -->
                         <el-input
                             v-else-if="config.type === 'textarea'"
                             :model-value="formData[config.key]"
@@ -108,7 +91,6 @@ const handleImageSuccess = (field: ComponentField, response: any, uploadFile: Up
                             @update:modelValue="(value: string) => handleInputChange(config, value)"
                         />
 
-                        <!-- 普通输入框 -->
                         <el-input
                             v-else
                             :model-value="formData[config.key]"

@@ -10,7 +10,6 @@ const emit = defineEmits<{
     (e: 'layoutChange', fields: ComponentField[]): void
 }>()
 
-// 处理布局更新
 const handleLayoutChange = (field: ComponentField, key: 'row' | 'span', value: number) => {
     const updatedFields = props.fieldsConfig.map(f => {
         if (f.key === field.key) {
@@ -24,7 +23,6 @@ const handleLayoutChange = (field: ComponentField, key: 'row' | 'span', value: n
 
 
 <template>
-            <!-- 布局设置区域 -->
             <div class="layout-settings mb-4">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="section-title text-sm font-medium text-gray-700 m-0">布局设置</h3>
@@ -71,7 +69,6 @@ const handleLayoutChange = (field: ComponentField, key: 'row' | 'span', value: n
 
 
 <style>
-/* 布局设置区域样式 */
 .layout-settings {
     background-color: #f8fafc;
     border-radius: 6px;
