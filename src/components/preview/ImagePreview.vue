@@ -67,15 +67,32 @@ const getFieldsByRow = (row: number) => {
                     >
                         <span class="flex-1 min-w-0 text-gray-700 text-sm leading-relaxed">
                             <template v-if="field.type === 'text'">
-                                <div 
-                                    class="whitespace-pre-wrap break-words leading-7 text-gray-800"
-                                    :class="{
-                                        'font-bold': field.isBold,
-                                        'italic': field.isItalic
-                                    }"
-                                >
-                                    {{ field.label }}：{{ field.value || ''}}
-                                </div>
+                                <template v-if="field.listStyle !== 'none'">
+                                    <ul :class="{
+                                        'list-disc': field.listStyle === 'disc',
+                                        'list-decimal': field.listStyle === 'decimal'
+                                    }" class="pl-4">
+                                        <li class="whitespace-pre-wrap break-words leading-7 text-gray-800"
+                                            :class="{
+                                                'font-bold': field.isBold,
+                                                'italic': field.isItalic
+                                            }"
+                                        >
+                                            {{ field.label }}：{{ field.value || ''}}
+                                        </li>
+                                    </ul>
+                                </template>
+                                <template v-else>
+                                    <div 
+                                        class="whitespace-pre-wrap break-words leading-7 text-gray-800"
+                                        :class="{
+                                            'font-bold': field.isBold,
+                                            'italic': field.isItalic
+                                        }"
+                                    >
+                                        {{ field.label }}：{{ field.value || ''}}
+                                    </div>
+                                </template>
                             </template>
                         </span>
                     </div>

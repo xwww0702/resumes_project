@@ -23,6 +23,7 @@ export interface ComponentField {
     alignment?: 'left' | 'right'
     isBold?: boolean
     isItalic?: boolean
+    listStyle?: 'none' | 'disc' | 'decimal'
 }
 
 // 组件配置

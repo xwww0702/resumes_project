@@ -1,11 +1,8 @@
 <script lang="ts" setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch } from 'vue'
 import type { ResumeComponent, ComponentField } from '../../type/Resume'
-// import  {useEditStore}  from '../../store/useEditStore'
 import Layout from './Layout.vue'
-import ContentEditer from './ContentEditer.vue';
-import { Document, Edit } from '@element-plus/icons-vue'
-import { useStyleChange } from '../../hooks/useStyleChange'
+import ContentEditor from './ContentEditor.vue'
 
 const props = defineProps<{
     component: ResumeComponent | null
@@ -20,15 +17,14 @@ const fieldsConfig = ref<ComponentField[]>([])
 const formData = ref<Record<string, any>>({})
 const formRef = ref()
 
-const { handleStyleChange, toggleBold, toggleItalic } = useStyleChange()
-
 // 初始化字段配置
 watch(() => props.component?.fields, (newFields) => {
     if (newFields) {
         fieldsConfig.value = newFields.map(field => ({
             ...field,
             row: field.row || 1,
-            span: field.span || 1
+            span: field.span || 1,
+            listStyle : 'none'
         }))
         // 初始化表单数据
         formData.value = newFields.reduce((acc, field) => {
@@ -48,14 +44,8 @@ const handleLayoutChange = (updatedFields: ComponentField[]) => {
 }
 
 // 处理内容更新
-const handleContentChange = (updatedFields: ComponentField[]) => {
-    // 更新表单数据
-    updatedFields.forEach(field => {
-        formData.value[field.key] = field.value
-    })
-    // 更新字段配置
-    fieldsConfig.value = updatedFields
-    emit('submit', updatedFields)
+const handleContentChange = (fieldsConfig: ComponentField[]) => {
+    emit('submit', fieldsConfig)
 }
 
 </script>
@@ -63,46 +53,10 @@ const handleContentChange = (updatedFields: ComponentField[]) => {
 <template>
     <div class="editor-container">
         <div class="editor-form">
-            <div v-for="field in fieldsConfig" :key="field.key" class="field-item">
-                <div class="field-header">
-                    <span class="field-label">{{ field.label }}</span>
-                    <div class="style-controls" v-if="field.type === 'text'">
-                        <el-tooltip content="加粗">
-                            <el-button 
-                                :type="field.isBold ? 'primary' : 'default'"
-                                size="small"
-                                @click="toggleBold(field, fieldsConfig, emit)"
-                            >
-                                <el-icon>B</el-icon>
-                            </el-button>
-                        </el-tooltip>
-                        <el-tooltip content="斜体">
-                            <el-button 
-                                :type="field.isItalic ? 'primary' : 'default'"
-                                size="small"
-                                @click="toggleItalic(field, fieldsConfig, emit)"
-                            >
-                                <el-icon>I</el-icon>
-                            </el-button>
-                        </el-tooltip>
-                    </div>
-                </div>
-                <el-input
-                    v-if="field.type === 'text'"
-                    v-model="field.value"
-                    :placeholder="field.placeholder"
-                    type="text"
-                    @input="handleContentChange(fieldsConfig)"
-                />
-                <el-input
-                    v-else-if="field.type === 'textarea'"
-                    v-model="field.value"
-                    :placeholder="field.placeholder"
-                    type="textarea"
-                    :rows="3"
-                    @input="handleContentChange(fieldsConfig)"
-                />
-            </div>
+            <ContentEditor 
+                :fieldsConfig="fieldsConfig"
+                @submit="handleContentChange"
+            />
         </div>
         <Layout 
             :type="component?.type"
@@ -120,9 +74,7 @@ const handleContentChange = (updatedFields: ComponentField[]) => {
 }
 
 .editor-form {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+    padding: 16px;
 }
 
 .field-item {

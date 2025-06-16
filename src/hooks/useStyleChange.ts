@@ -10,6 +10,7 @@ export function useStyleChange() {
         // 确保字段的样式属性被正确设置
         field.isBold = field.isBold || false
         field.isItalic = field.isItalic || false
+        field.listStyle = field.listStyle || 'none'
         emit('submit', fieldsConfig)
     }
 
@@ -23,9 +24,18 @@ export function useStyleChange() {
         handleStyleChange(field, fieldsConfig, emit)
     }
 
+    const toggleListStyle = (field: ComponentField, fieldsConfig: ComponentField[], emit: EmitType) => {
+        const styles: ('none' | 'disc' | 'decimal')[] = ['none', 'disc', 'decimal']
+        const currentIndex = styles.indexOf(field.listStyle || 'none')
+        const nextIndex = (currentIndex + 1) % styles.length
+        field.listStyle = styles[nextIndex]
+        handleStyleChange(field, fieldsConfig, emit)
+    }
+
     return {
         handleStyleChange,
         toggleBold,
-        toggleItalic
+        toggleItalic,
+        toggleListStyle
     }
 } 

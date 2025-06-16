@@ -13,6 +13,7 @@ declare module 'vue' {
     CommonEditor: typeof import('./src/components/editor/CommonEditor.vue')['default']
     CommonPreview: typeof import('./src/components/preview/CommonPreview.vue')['default']
     ContentEditer: typeof import('./src/components/editor/ContentEditer.vue')['default']
+    ContentEditor: typeof import('./src/components/editor/ContentEditor.vue')['default']
     ContentPreview: typeof import('./src/components/preview/ContentPreview.vue')['default']
     EditPart: typeof import('./src/components/EditPart.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
