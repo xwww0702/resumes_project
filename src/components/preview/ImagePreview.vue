@@ -67,7 +67,13 @@ const getFieldsByRow = (row: number) => {
                     >
                         <span class="flex-1 min-w-0 text-gray-700 text-sm leading-relaxed">
                             <template v-if="field.type === 'text'">
-                                <div class="whitespace-pre-wrap break-words leading-7 text-gray-800">
+                                <div 
+                                    class="whitespace-pre-wrap break-words leading-7 text-gray-800"
+                                    :class="{
+                                        'font-bold': field.isBold,
+                                        'italic': field.isItalic
+                                    }"
+                                >
                                     {{ field.label }}：{{ field.value || ''}}
                                 </div>
                             </template>

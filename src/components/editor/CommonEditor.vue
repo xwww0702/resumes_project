@@ -4,6 +4,8 @@ import type { ResumeComponent, ComponentField } from '../../type/Resume'
 // import  {useEditStore}  from '../../store/useEditStore'
 import Layout from './Layout.vue'
 import ContentEditer from './ContentEditer.vue';
+import { Document, Edit } from '@element-plus/icons-vue'
+import { useStyleChange } from '../../hooks/useStyleChange'
 
 const props = defineProps<{
     component: ResumeComponent | null
@@ -17,6 +19,8 @@ const emit = defineEmits<{
 const fieldsConfig = ref<ComponentField[]>([])
 const formData = ref<Record<string, any>>({})
 const formRef = ref()
+
+const { handleStyleChange, toggleBold, toggleItalic } = useStyleChange()
 
 // 初始化字段配置
 watch(() => props.component?.fields, (newFields) => {
@@ -58,130 +62,104 @@ const handleContentChange = (updatedFields: ComponentField[]) => {
 
 <template>
     <div class="editor-container">
-        <el-form
-            ref="formRef"
-            :model="formData"
-            label-width="80px"
-            class="editor-form"
-        >
-        <!-- v-if="(component?.type !== 'image-left')&&(component?.type !== 'image-right')" -->
-            <Layout 
-                :type = "component?.type"
-                :fields-config="fieldsConfig" 
-                @layout-change="handleLayoutChange" 
-            />
-            <ContentEditer
-                :form-ref="{ value: formRef }"
-                :fields-config="fieldsConfig"
-                :form-data="formData"
-                @submit="handleContentChange"
-            />
-        </el-form>
+        <div class="editor-form">
+            <div v-for="field in fieldsConfig" :key="field.key" class="field-item">
+                <div class="field-header">
+                    <span class="field-label">{{ field.label }}</span>
+                    <div class="style-controls" v-if="field.type === 'text'">
+                        <el-tooltip content="加粗">
+                            <el-button 
+                                :type="field.isBold ? 'primary' : 'default'"
+                                size="small"
+                                @click="toggleBold(field, fieldsConfig, emit)"
+                            >
+                                <el-icon>B</el-icon>
+                            </el-button>
+                        </el-tooltip>
+                        <el-tooltip content="斜体">
+                            <el-button 
+                                :type="field.isItalic ? 'primary' : 'default'"
+                                size="small"
+                                @click="toggleItalic(field, fieldsConfig, emit)"
+                            >
+                                <el-icon>I</el-icon>
+                            </el-button>
+                        </el-tooltip>
+                    </div>
+                </div>
+                <el-input
+                    v-if="field.type === 'text'"
+                    v-model="field.value"
+                    :placeholder="field.placeholder"
+                    type="text"
+                    @input="handleContentChange(fieldsConfig)"
+                />
+                <el-input
+                    v-else-if="field.type === 'textarea'"
+                    v-model="field.value"
+                    :placeholder="field.placeholder"
+                    type="textarea"
+                    :rows="3"
+                    @input="handleContentChange(fieldsConfig)"
+                />
+            </div>
+        </div>
+        <Layout 
+            :type="component?.type"
+            :fields-config="fieldsConfig"
+            @layout-change="handleLayoutChange"
+        />
     </div>
 </template>
 
 <style scoped>
 .editor-container {
-    height: 100%;
-    overflow-y: auto;
-    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .editor-form {
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-
-
-
-
-
-
-/* 表单内容区域样式 */
-.form-content {
-    background-color: white;
-    border-radius: 6px;
-    padding: 16px;
-    margin-top: 16px;
-}
-
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
-    margin-bottom: 16px;
-}
-
-.form-item {
-    margin-bottom: 0;
-}
-
-.form-item.span-1 {
-    grid-column: span 1;
-}
-
-.form-item.span-2 {
-    grid-column: span 2;
-}
-
-.form-item.span-3 {
-    grid-column: span 3;
-}
-
-/* 图片上传样式 */
-.image-upload {
-    width: 100px;
-    height: 100px;
-    border: 1px dashed #d1d5db;
-    border-radius: 4px;
-    cursor: pointer;
     display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.field-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.field-header {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
 }
 
-.image-upload:hover {
-    border-color: #3b82f6;
+.field-label {
+    font-size: 14px;
+    color: #374151;
+    font-weight: 500;
 }
 
-.preview-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 4px;
+.style-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
 
-.upload-icon {
-    font-size: 24px;
-    color: #9ca3af;
+:deep(.el-button) {
+    padding: 4px 8px;
+    font-weight: bold;
 }
 
-/* 输入框样式 */
-.textarea-input :deep(.el-textarea__inner),
-.text-input :deep(.el-input__wrapper) {
-    box-shadow: 0 0 0 1px #e5e7eb;
+:deep(.el-button[type="primary"]) {
+    background-color: #409eff;
+    border-color: #409eff;
 }
 
-.textarea-input :deep(.el-textarea__inner:hover),
-.text-input :deep(.el-input__wrapper:hover) {
-    box-shadow: 0 0 0 1px #d1d5db;
-}
-
-.textarea-input :deep(.el-textarea__inner:focus),
-.text-input :deep(.el-input__wrapper.is-focus) {
-    box-shadow: 0 0 0 1px #3b82f6;
-}
-
-/* 提交按钮样式 */
-.submit-container {
-    margin-top: 24px;
-    padding-top: 16px;
-    border-top: 1px solid #e5e7eb;
-}
-
-.submit-button {
-    min-width: 96px;
+:deep(.el-icon) {
+    font-size: 14px;
 }
 </style> 

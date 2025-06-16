@@ -33,9 +33,17 @@ const groupedFields = computed(() => {
                             class="field-item"
                             :class="[`span-${field.span || 1}`]"
                         >
-                            <span class="field-value">
+                            <span class="flex-1 min-w-0 text-gray-700 text-sm leading-relaxed">
                                 <template v-if="field.type === 'text'">
-                                    <div class="whitespace-pre-wrap leading-relaxed">{{ field.value || field.placeholder }}</div>
+                                    <div 
+                                        class="whitespace-pre-wrap leading-relaxed text-gray-800"
+                                        :class="{
+                                            'font-bold': field.isBold,
+                                            'italic': field.isItalic
+                                        }"
+                                    >
+                                        {{ field.value || field.placeholder}}
+                                    </div>
                                 </template>
                                 <template v-if="field.type === 'textarea'">
                                     <div class="whitespace-pre-wrap leading-relaxed">{{ field.value || field.placeholder }}</div>

@@ -18,10 +18,11 @@ export interface ComponentField {
     span?: number
     row?: number
     placeholder?: string
-    options?: { label: string; value: string }[]
+    options?: string[]
     rules?: { required?: boolean; message?: string }[]
-    editable?: boolean
     alignment?: 'left' | 'right'
+    isBold?: boolean
+    isItalic?: boolean
 }
 
 // 组件配置

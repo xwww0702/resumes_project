@@ -18,10 +18,17 @@ const currentConfig = computed(() => {
 
 // 处理表单提交
 const handleSubmit = (fields: ComponentField[]) => {
-    
     if (selectedComponent.value) {
+        // 确保保留所有字段属性，包括样式属性
+        const updatedFields = fields.map(field => ({
+            ...field,
+            value: selectedComponent.value?.fields?.find(f => f.key === field.key)?.value || field.value || '',
+            isBold: field.isBold || false,
+            isItalic: field.isItalic || false
+        }))
+        
         store.updateComponent(selectedComponent.value.id, {
-            fields
+            fields: updatedFields
         })
     }
 }
