@@ -37,8 +37,8 @@ const groupedFields = computed(() => {
                                 <template v-if="field.type === 'text'">
                                     <template v-if="field.listStyle !== 'none'">
                                         <ul :class="{
-                                            'list-disc': field.listStyle === 'disc',
-                                            'list-decimal': field.listStyle === 'decimal'
+                                            'list-disc ml-4': field.listStyle === 'disc',
+                                            'list-decimal ml-4': field.listStyle === 'decimal'
                                         }" >
                                             <li class="whitespace-pre-wrap leading-relaxed text-gray-800"
                                                 :class="{

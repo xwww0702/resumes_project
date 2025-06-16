@@ -55,7 +55,7 @@ const componentConfigs = reactive<Record<ResumeComponentType, ComponentConfig>>(
         description: '用于显示标题的组件',
         icon: 'title',
         defaultFields: [
-            { key: 'title', label: '标题', type: 'text', span: 1, row: 1, placeholder: '请输入标题', value: '个人信息' }
+            { key: 'title', label: '标题', type: 'text', span: 1, row: 1, placeholder: '请输入标题', value: '' }
         ]
     }
 })
