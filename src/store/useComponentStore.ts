@@ -22,6 +22,7 @@ export const useComponentStore = defineStore('component', () => {
         const newComponent: ResumeComponent = {
             id: Date.now().toString(),
             type,
+            align:config.align||'',
             title: config.title,
             fields: config.defaultFields.map(field => ({
                 ...field,

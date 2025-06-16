@@ -64,7 +64,9 @@ const handleContentChange = (updatedFields: ComponentField[]) => {
             label-width="80px"
             class="editor-form"
         >
+        <!-- v-if="(component?.type !== 'image-left')&&(component?.type !== 'image-right')" -->
             <Layout 
+                :type = "component?.type"
                 :fields-config="fieldsConfig" 
                 @layout-change="handleLayoutChange" 
             />

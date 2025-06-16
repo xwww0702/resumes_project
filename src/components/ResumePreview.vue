@@ -221,17 +221,18 @@ defineExpose({
                             @click="handleComponentClick(component)"
                         >
                             <CommonPreview
-                                v-if="component.type !== 'image'"
+                                v-if="(component.type !== 'image-left')&&(component.type !== 'image-right')"
                                 :type="component.type"
                                 :fields="component.fields"
                                 :key="`common-${component.id}`"
                                 class="cursor-pointer hover:ring-2 hover:ring-blue-500 hover:ring-opacity-50 transition-all duration-200"
                             />
                             <ImagePreview
-                                v-if="component.type === 'image'"
+                                v-if="(component.type === 'image-left')||(component.type === 'image-right')"
                                 :type="component.type"
                                 :fields="component.fields"
                                 :key="`image-${component.id}`"
+                                :align ='component.align'
                                 class="cursor-pointer hover:ring-2 hover:ring-blue-500 hover:ring-opacity-50 transition-all duration-200"
                             />
                             <button 

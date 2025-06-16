@@ -5,6 +5,7 @@ import type { ComponentField, ResumeComponentType } from '../../type/Resume'
 const props = defineProps<{
     type: ResumeComponentType
     fields?: ComponentField[]
+    align: string
 }>()
 
 const imageField = computed(() => {
@@ -16,7 +17,15 @@ const textFields = computed(() => {
 })
 
 const getImageAlignment = (field: ComponentField | undefined) => {
-    return field?.alignment || 'left'
+    return props.align || 'left'
+}
+
+const getMaxRow = () => {
+    return Math.max(...(textFields.value.map(field => field.row || 1)))
+}
+
+const getFieldsByRow = (row: number) => {
+    return textFields.value.filter(field => (field.row || 1) === row)
 }
 </script>
 
@@ -38,23 +47,33 @@ const getImageAlignment = (field: ComponentField | undefined) => {
             </div>
         </div>
 
-        <div class="grid grid-cols-3  ml-[10px] mr-4 absolute bottom-4 left-[140px] right-4">
+        <div 
+            class="absolute bottom-4"
+            :class="getImageAlignment(imageField) === 'right' ? 'left-4 right-[140px]' : 'left-[140px] right-4'"
+        >
             <div 
-                v-for="field in textFields" 
-                :key="field.key"
-                class="flex items-start min-h-6 py-0.5"
-                :class="[
-                    `col-span-${field.span || 1}`,
-                    field.type === 'textarea' ? 'min-h-[60px]' : ''
-                ]"
+                v-for="row in getMaxRow()" 
+                :key="`row-${row}`"
+                class="grid grid-cols-3 gap-3 mb-3 last:mb-0"
             >
-                <span class="flex-1 min-w-0 text-gray-700 text-sm leading-relaxed">
-                    <template v-if="field.type === 'text'">
-                        <div class="whitespace-pre-wrap break-words leading-7 text-gray-800">
-                            {{ field.label }}：{{ field.value || field.placeholder }}
-                        </div>
-                    </template>
-                </span>
+                <template v-for="field in getFieldsByRow(row)" :key="`${type}-field-${field.key}`">
+                    <div 
+                        class="flex items-start min-h-6 py-0.5"
+                        :class="{
+                            'col-span-1': field.span === 1,
+                            'col-span-2': field.span === 2,
+                            'col-span-3': field.span === 3
+                        }"
+                    >
+                        <span class="flex-1 min-w-0 text-gray-700 text-sm leading-relaxed">
+                            <template v-if="field.type === 'text'">
+                                <div class="whitespace-pre-wrap break-words leading-7 text-gray-800">
+                                    {{ field.label }}：{{ field.value || ''}}
+                                </div>
+                            </template>
+                        </span>
+                    </div>
+                </template>
             </div>
         </div>
     </div>

@@ -4,6 +4,7 @@ import { InfoFilled } from '@element-plus/icons-vue'
 
 const props = defineProps<{
     fieldsConfig: ComponentField[]
+    type:string
 }>()
 
 const emit = defineEmits<{
@@ -34,7 +35,7 @@ const handleLayoutChange = (field: ComponentField, key: 'row' | 'span', value: n
                     <div v-for="field in fieldsConfig" :key="field.key" class="layout-item">
                         <div class="field-label text-xs text-gray-600">{{ field.label }}</div>
                         <div class="field-controls">
-                            <div class="control-group">
+                            <div class="control-group" v-if="(type !== 'image-left')&&(type !== 'image-right')">
                                 <label class="text-xs text-gray-500">行号</label>
                                 <el-input-number 
                                     :model-value="field.row"

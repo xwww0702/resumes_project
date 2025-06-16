@@ -63,13 +63,13 @@ const {
                 />
             </div>
 
-            <div class="flex flex-col gap-2">
+            <!-- <div class="flex flex-col gap-2">
                 <label class="text-sm text-gray-600">对齐方式</label>
                 <el-radio-group v-model="alignment" @change="(val: 'left' | 'right') => handleAlignmentChange(val, (v) => emit('update:alignment', v))">
                     <el-radio-button value="left">左对齐</el-radio-button>
                     <el-radio-button value="right">右对齐</el-radio-button>
                 </el-radio-group>
-            </div>
+            </div> -->
 
             <el-button @click="showCropper = true">重新裁剪</el-button>
         </div>

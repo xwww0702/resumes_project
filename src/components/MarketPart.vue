@@ -13,10 +13,11 @@ const emit = defineEmits<{
 
 // 创建市场组件列表
 const marketComponents = computed(() => {
-    return Object.entries(componentConfigs).map(([type, config]) => ({
-        id: `market-${type}`,
+    return Object.entries(componentConfigs).map(([type, config],index) => ({
+        id: `market-${index}`,
         type: type as ResumeComponent['type'],
         title: config.title,
+        align: config.align || 'left',
         fields: config.defaultFields.map(field => ({
             ...field,
             key: field.key || `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
@@ -43,24 +44,24 @@ const handleDragStart = (e: DragEvent, component: ResumeComponent) => {
     <div class="h-full flex flex-col">
         <div class="flex-1 overflow-y-auto px-4 py-2 space-y-4">
             <div
-                v-for="component in marketComponents"
-                :key="component.id"
+                v-for="(component,index) in marketComponents"
+                :key="index"
                 class="cursor-move transition-transform duration-200 hover:-translate-y-1"
                 draggable="true"
                 @dragstart="(e) => handleDragStart(e, component)"
             >
                 <CommonPreview 
-                    v-if="component.type!=='image'"
+                    v-if="(component.type !== 'image-left')&&(component.type !== 'image-right')"
                     :type="component.type"
                     :fields="component.fields"
                     class="bg-white border border-gray-200 rounded-lg shadow-sm hover:border-blue-500 hover:shadow-md transition-all duration-200"
                 />
                 <ImagePreview
-                    v-if="component.type==='image'"
+                    v-if="(component.type === 'image-left')||(component.type === 'image-right')"
                     :type="component.type"
                     :fields="component.fields"
                     class="bg-white border border-gray-200 rounded-lg shadow-sm hover:border-blue-500 hover:shadow-md transition-all duration-200"
-               
+                    :align ='component.align'
                 />
             </div>
         </div>

@@ -37,6 +37,9 @@ const groupedFields = computed(() => {
                                 <template v-if="field.type === 'text'">
                                     <div class="whitespace-pre-wrap leading-relaxed">{{ field.value || field.placeholder }}</div>
                                 </template>
+                                <template v-if="field.type === 'textarea'">
+                                    <div class="whitespace-pre-wrap leading-relaxed">{{ field.value || field.placeholder }}</div>
+                                </template>
                             </span>
                         </div>
                     </template>
@@ -60,6 +63,7 @@ const groupedFields = computed(() => {
 
 .field-item {
     display: flex;
+    justify-content: space-between;
     align-items: flex-start;
 }
 
@@ -80,5 +84,6 @@ const groupedFields = computed(() => {
     min-width: 0;
     color: #333;
     line-height: 1.5;
+    
 }
 </style>
