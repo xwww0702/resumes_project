@@ -7,16 +7,20 @@ import { ZoomOut, ZoomIn } from '@element-plus/icons-vue'
 import { useComponentStore } from '../store/useComponentStore'
 import { handleWheel, zoomOut, zoomIn, resetZoom, scale, minScale, maxScale } from '../hooks/useZooms'
 import throttle from 'lodash/throttle'
+import { useResumeStore } from '../store/useResumeStore'
 
 const store = useComponentStore()
 const { componentList, addComponent, removeComponent, componentRefs, componentHeights, updateComponent } = store
 
 const componentData = new Map<string, any>()
-
+const {createNewResume} = useResumeStore()
 // 定义页面类型
 interface ResumePage {
     components: ResumeComponent[]
 }
+onMounted(()=>{
+    createNewResume()
+})
 
 // 使用 throttle 优化高度更新
 const updateComponentHeight = throttle((id: string, height: number) => {
@@ -149,7 +153,7 @@ const handleDragLeave = (e: DragEvent) => {
 }
 
 onMounted(() => {
-    window.addEventListener('wheel', handleWheel, { passive: false })
+    window.addEventListener('wheel', handleWheel, { passive: true })
 })
 
 onUnmounted(() => {

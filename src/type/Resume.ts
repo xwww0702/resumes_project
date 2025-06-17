@@ -46,7 +46,7 @@ export interface ResumeComponent {
     id: string
     type: ResumeComponentType
     // data?: ComponentData
-    align:string,
+    align?:string,
     title?: string
     fields?: ComponentField[]
     template?: ComponentConfig

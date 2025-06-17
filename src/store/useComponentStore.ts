@@ -22,8 +22,8 @@ export const useComponentStore = defineStore('component', () => {
         const newComponent: ResumeComponent = {
             id: Date.now().toString(),
             type,
-            align:config.align||'',
             title: config.title,
+            align:config.align,
             fields: config.defaultFields.map(field => ({
                 ...field,
                 key: field.key || `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
@@ -31,6 +31,7 @@ export const useComponentStore = defineStore('component', () => {
         }
 
         componentList.value.push(newComponent)
+        
         return newComponent
     }
 

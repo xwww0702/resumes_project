@@ -2,11 +2,13 @@
 import { computed } from 'vue'
 import type { ComponentField, ResumeComponentType } from '../../type/Resume'
 
-const props = defineProps<{
-    type: ResumeComponentType
+const props = withDefaults(defineProps<{
+    type: string
     fields?: ComponentField[]
-    align: string
-}>()
+    align?: string
+}>(), {
+    align: 'left'
+})
 
 const imageField = computed(() => {
     return props.fields?.find(field => field.type === 'image')
