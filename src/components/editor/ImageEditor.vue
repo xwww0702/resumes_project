@@ -3,6 +3,7 @@ import type { ComponentField } from '../../type/Resume'
 import { Cropper } from 'vue-advanced-cropper'
 import 'vue-advanced-cropper/dist/style.css'
 import { useImageEditor } from '../../hooks/useImageEditor'
+import { Upload } from '@element-plus/icons-vue'
 
 interface Props {
     field: ComponentField
@@ -19,13 +20,9 @@ const {
     showCropper,
     cropperRef,
     imageUrl,
-    imageSize,
-    alignment,
     imageStyle,
     handleFileChange,
     handleCrop,
-    handleSizeChange,
-    handleAlignmentChange
 } = useImageEditor(props.field)
 </script>
 
@@ -33,47 +30,20 @@ const {
     <div class="w-full">
         <div class="mb-4 border border-dashed border-gray-300 rounded-md overflow-hidden" :style="imageStyle">
             <img v-if="value" :src="value" class="w-full h-full object-cover" />
-            <div v-else class="w-full h-full flex flex-col items-center justify-center cursor-pointer bg-gray-50">
-                <input
-                    type="file"
-                    accept="image/*"
-                    class="absolute w-full h-full opacity-0 cursor-pointer"
-                    @change="handleFileChange"
-                />
-                <span class="text-gray-500">点击上传图片</span>
+            <div v-else class="w-full h-full flex flex-col items-center justify-center bg-gray-50 p-4">
+                <div class="upload-button">
+                    <input
+                        type="file"
+                        accept="image/*"
+                        class="file-input"
+                        @change="handleFileChange"
+                    />
+                    <el-icon class="text-2xl text-gray-400 mb-2"><Upload /></el-icon>
+                </div>
             </div>
         </div>
-        <div v-if="value" class="flex flex-wrap gap-4 p-4 bg-gray-50 rounded-md">
-            <div class="flex flex-col gap-2">
-                <label class="text-sm text-gray-600">宽度 (px)</label>
-                <el-input-number
-                    v-model="imageSize.width"
-                    :min="50"
-                    :max="500"
-                    @update:modelValue="(val: number) => handleSizeChange('width', val)"
-                />
-            </div>
-            <div class="flex flex-col gap-2">
-                <label class="text-sm text-gray-600">高度 (px)</label>
-                <el-input-number
-                    v-model="imageSize.height"
-                    :min="50"
-                    :max="500"
-                    @update:modelValue="(val: number) => handleSizeChange('height', val)"
-                />
-            </div>
-
-            <!-- <div class="flex flex-col gap-2">
-                <label class="text-sm text-gray-600">对齐方式</label>
-                <el-radio-group v-model="alignment" @change="(val: 'left' | 'right') => handleAlignmentChange(val, (v) => emit('update:alignment', v))">
-                    <el-radio-button value="left">左对齐</el-radio-button>
-                    <el-radio-button value="right">右对齐</el-radio-button>
-                </el-radio-group>
-            </div> -->
-
+       
             <el-button @click="showCropper = true">重新裁剪</el-button>
-        </div>
-
         <el-dialog
             v-model="showCropper"
             title="裁剪图片"
@@ -115,21 +85,28 @@ const {
     object-fit: cover;
 }
 
-.upload-placeholder {
-    width: 100%;
-    height: 100%;
+.upload-button {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    background-color: #fafafa;
+    padding: 20px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.upload-button:hover {
+    background-color: #f0f0f0;
 }
 
 .file-input {
     position: absolute;
     width: 100%;
     height: 100%;
+    top: 0;
+    left: 0;
     opacity: 0;
     cursor: pointer;
 }

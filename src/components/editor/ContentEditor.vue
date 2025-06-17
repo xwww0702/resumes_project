@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue'
 import type { ComponentField } from '../../type/Resume'
 import { useStyleChange } from '../../hooks/useStyleChange'
+import ImageEditor from './ImageEditor.vue'
 
 const props = defineProps<{
     fieldsConfig: ComponentField[]
@@ -16,6 +17,12 @@ const { toggleBold, toggleItalic, toggleListStyle } = useStyleChange()
 const handleContentChange = (fieldsConfig: ComponentField[]) => {
     emit('submit', fieldsConfig)
 }
+
+const handleImageUpdate = (field: ComponentField, value: string) => {
+    field.value = value
+    emit('submit', props.fieldsConfig)
+}
+
 </script>
 
 <template>
@@ -53,21 +60,30 @@ const handleContentChange = (fieldsConfig: ComponentField[]) => {
                     </el-tooltip>
                 </div>
             </div>
-            <el-input
-                v-if="field.type === 'text'"
-                v-model="field.value"
-                :placeholder="field.placeholder"
-                type="text"
-                @input="handleContentChange(fieldsConfig)"
-            />
-            <el-input
-                v-else-if="field.type === 'textarea'"
-                v-model="field.value"
-                :placeholder="field.placeholder"
-                type="textarea"
-                :rows="3"
-                @input="handleContentChange(fieldsConfig)"
-            />
+            <template v-if="field.type === 'image'">
+                <ImageEditor
+                    :field="field"
+                    :value="field.value || ''"
+                    @update="(value) => handleImageUpdate(field, value)"
+                />
+            </template>
+            <template v-else>
+                <el-input
+                    v-if="field.type === 'text'"
+                    v-model="field.value"
+                    :placeholder="field.placeholder"
+                    type="text"
+                    @input="handleContentChange(fieldsConfig)"
+                />
+                <el-input
+                    v-else-if="field.type === 'textarea'"
+                    v-model="field.value"
+                    :placeholder="field.placeholder"
+                    type="textarea"
+                    :rows="3"
+                    @input="handleContentChange(fieldsConfig)"
+                />
+            </template>
         </div>
     </div>
 </template>

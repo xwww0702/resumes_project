@@ -11,8 +11,6 @@ export function useImageEditor(field: ComponentField) {
         height: 100
     })
 
-    const alignment = ref<'left' | 'right'>(field.alignment || 'left')
-
     const handleFileChange = (event: Event) => {
         const file = (event.target as HTMLInputElement).files?.[0]
         if (file) {
@@ -34,21 +32,6 @@ export function useImageEditor(field: ComponentField) {
         }
     }
 
-    const handleSizeChange = (type: 'width' | 'height', value: number) => {
-        imageSize.value[type] = value
-        // 保持宽高比
-        if (type === 'width') {
-            imageSize.value.height = Math.round(value * (imageSize.value.height / imageSize.value.width))
-        } else {
-            imageSize.value.width = Math.round(value * (imageSize.value.width / imageSize.value.height))
-        }
-    }
-
-    const handleAlignmentChange = (value: 'left' | 'right', emit: (value: 'left' | 'right') => void) => {
-        alignment.value = value
-        emit(value)
-    }
-
     const imageStyle = computed(() => ({
         width: `${imageSize.value.width}px`,
         height: `${imageSize.value.height}px`
@@ -59,11 +42,8 @@ export function useImageEditor(field: ComponentField) {
         cropperRef,
         imageUrl,
         imageSize,
-        alignment,
         imageStyle,
         handleFileChange,
         handleCrop,
-        handleSizeChange,
-        handleAlignmentChange
     }
 } 
