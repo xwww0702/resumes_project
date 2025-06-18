@@ -96,6 +96,11 @@ const ResumeSchema = new mongoose.Schema({
     updatedAt: {
         type: Date,
         default: Date.now
+    },
+    title:{
+        type:String,
+        required: true,
+        trim: true
     }
 })
 

@@ -1,11 +1,12 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import type { ResumeComponent, ComponentField } from '../type/Resume'
-import { saveResume as saveResumeRequest, getResume } from '../service/request'
+import { saveResumeRequest as saveResumeRequest, getResume,getAllResume } from './request'
 
 interface ResumeData {
     id: string
     userId: string
-    content: ResumeComponent[]
+    content: ResumeComponent[],
+    title: string
 }
 
 export function useSaveResume() {
@@ -19,11 +20,13 @@ export function useSaveResume() {
         }
 
         // 设置新的定时器
+        //需要更改title逻辑
         saveTimer.value = window.setTimeout(() => {
             const data: ResumeData = {
                 id: component.id,
                 userId: 'user123',
-                content: [component]
+                content: [component],
+                title: ''
             }
             saveResume(data)
         }, 1000) // 1秒后自动保存
@@ -34,7 +37,7 @@ export function useSaveResume() {
 
         try {
             isSaving.value = true
-            const response = await saveResumeRequest(data.id, data.content, data.userId)
+            const response = await saveResumeRequest(data.id, data.content, data.userId,data.title)
             console.log('保存成功:', response)
             return response
         } catch (error) {
@@ -68,7 +71,7 @@ export function useGetResume(id: string) {
 
     const fetchData = async () => {
         try {
-            const res = await getResume(id, controller.signal)
+            const res = await getAllResume(id, controller.signal)
             console.log('获取结果:', res)
         } catch (err: any) {
             if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') {
@@ -76,6 +79,30 @@ export function useGetResume(id: string) {
             } else {
                 console.error('获取请求失败:', err)
             }
+        }
+    }
+
+    return { fetchData }
+}
+
+export function userGetAllResume(userId: string) {
+    const controller = new AbortController()
+
+    onUnmounted(() => {
+        controller.abort()
+    })
+    const fetchData = async () => {
+        try {
+            const res = await getAllResume(userId, controller.signal)
+            console.log('获取结果:', res)
+            return res.data.data
+        } catch (err: any) {
+            if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') {
+                console.warn('获取请求被取消')
+            } else {
+                console.error('获取请求失败:', err)
+            }
+            return []
         }
     }
 

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted, computed, nextTick, watch } from 'vue'
-import type { ResumeComponent } from '../type/Resume'
+import { ref, onMounted, onUnmounted, computed, nextTick, watch, type DefineProps } from 'vue'
+import type { ResumeComponent, ResumeData } from '../type/Resume'
 import CommonPreview from './preview/CommonPreview.vue'
 import ImagePreview from './preview/ImagePreview.vue'
 import { ZoomOut, ZoomIn } from '@element-plus/icons-vue'
@@ -8,19 +8,22 @@ import { useComponentStore } from '../store/useComponentStore'
 import { handleWheel, zoomOut, zoomIn, resetZoom, scale, minScale, maxScale } from '../hooks/useZooms'
 import throttle from 'lodash/throttle'
 import { useResumeStore } from '../store/useResumeStore'
+import { storeToRefs } from 'pinia'
 
 const store = useComponentStore()
-const { componentList, addComponent, removeComponent, componentRefs, componentHeights, updateComponent } = store
-
+const { componentList } = storeToRefs(store)
+const { addComponent, removeComponent, componentRefs, componentHeights, updateComponent } = store
+const resumeStore = useResumeStore()
+const props = defineProps<{
+  id: string
+}>()
 const componentData = new Map<string, any>()
+
 const {createNewResume} = useResumeStore()
 // 定义页面类型
 interface ResumePage {
     components: ResumeComponent[]
 }
-onMounted(()=>{
-    createNewResume()
-})
 
 // 使用 throttle 优化高度更新
 const updateComponentHeight = throttle((id: string, height: number) => {
@@ -55,12 +58,12 @@ const computePages = (): void => {
     const pageHeight = maxPageHeight.value || 297 * 3.78 // 默认A4纸高度（297mm * 3.78px/mm）
     const minComponentHeight = 20 // 最小组件高度
 
-    if (componentList.length === 0) {
+    if (componentList.value.length === 0) {
         pages.value = [{ components: [] }]
         return
     }
 
-    for (const component of componentList) {
+    for (const component of componentList.value) {
         const componentHeight = componentHeights.get(component.id) || minComponentHeight
         
         // 如果当前组件高度超过页面高度，创建新页面
@@ -98,6 +101,12 @@ const computedPages = computed<ResumePage[]>(() => {
 })
 
 onMounted(() => {
+    if(props.id){
+        const resume = resumeStore.resumeList.find((r: ResumeData) => r.id === props.id)
+        if (resume) {
+            componentList.value = resume.content
+        }
+    }
     nextTick(() => {
         if (resumePagesRef.value) {
             maxPageHeight.value = resumePagesRef.value.offsetHeight - 40 // 减去上下内边距和边距
@@ -176,7 +185,7 @@ const handleComponentClick = (component: ResumeComponent) => {
 
 watch(() => componentList, () => {
     nextTick(() => {
-        componentList.forEach(component => {
+        componentList.value.forEach(component => {
             const el = componentRefs.get(component.id)
             if (el) {
                 updateComponentHeight(component.id, el.offsetHeight)

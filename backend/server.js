@@ -33,7 +33,7 @@ const validateResumeData = (req, res, next) => {
 // 路由
 app.post('/api/resume', validateResumeData, async (req, res) => {
     try {
-        const { id, content, userId } = req.body
+        const { id, content, userId, title } = req.body
         
         // 查找是否存在相同 userId 和 id 的简历
         const existingResume = await Resume.findOne({ userId, id })
@@ -51,7 +51,8 @@ app.post('/api/resume', validateResumeData, async (req, res) => {
                 userId,
                 content,
                 createdAt: new Date(),
-                updatedAt: new Date()
+                updatedAt: new Date(),
+                title
             })
             await newResume.save()
             res.json({ success: true, data: newResume })
@@ -59,6 +60,15 @@ app.post('/api/resume', validateResumeData, async (req, res) => {
     } catch (err) {
         console.error('❌ Failed to save resume:', err)
         res.status(500).json({ success: false, message: 'Server error' })
+    }
+})
+
+app.get('/api/resumes/:userId', async (req, res) => {
+    try {
+      const resumes = await Resume.find({ userId: req.params.userId });
+      res.json({ success: true, data: resumes });
+    } catch (err) {
+      res.status(500).json({ success: false, message: 'Server error' });
     }
 })
 
@@ -79,6 +89,7 @@ app.get('/api/resume/:id', async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error' })
     }
 })
+
 
 // 错误处理中间件
 app.use((err, req, res, next) => {

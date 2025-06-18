@@ -51,7 +51,15 @@ export interface ResumeComponent {
     fields?: ComponentField[]
     template?: ComponentConfig
 }
-
+//简历数据
+export interface ResumeData {
+    id: string
+    userId:string,
+    content: ResumeComponent[],
+    createdAt: Date,
+    updatedAt: Date,
+    title: string
+  }
 // 定义组件映射接口
 export interface ComponentMap {
     [key: string]: any
