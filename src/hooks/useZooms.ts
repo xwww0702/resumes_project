@@ -24,7 +24,6 @@ export const resetZoom = () => {
 
 export const handleWheel = (e: WheelEvent) => {
     if (e.ctrlKey || e.metaKey) {
-        e.preventDefault()
         if (e.deltaY < 0) {
             if (scale.value < maxScale) {
                 scale.value = Math.min(scale.value + scaleStep, maxScale)
