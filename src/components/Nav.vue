@@ -14,6 +14,9 @@ const newResume = ()=>{
     createNewResume()
     router.push('/')
 }
+
+console.log(resumeStore.currentResumeTitle);
+
 </script>
 
 <template>

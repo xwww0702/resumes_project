@@ -4,26 +4,21 @@ import ResumePreview from '../components/ResumePreview.vue'
 import { useComponentStore } from '../store/useComponentStore'
 import { ref } from 'vue'
 import type { ResumeComponent } from '../type/Resume'
-
+import Title from '../components/Title.vue'
 const asideWidth = ref(500)
 const previewRef = ref()
 const store = useComponentStore()
-
 
 const handleEdit = (component: ResumeComponent) => {
     store.selectComponent(component)
 }
 
-import { useRoute } from 'vue-router'
-
-const route = useRoute()
-console.log(route.query.id) 
 </script>
 
 
 
 <template>
-
+<Title/>
 <el-container class="main-container">
                 <el-aside :width="`${asideWidth}px`" class="resize-aside">
                     <ResumeCompPart />
@@ -33,7 +28,6 @@ console.log(route.query.id)
                     <ResumePreview 
                         ref="previewRef"
                         @edit="handleEdit"
-                        :id="route.query.id as string"
                     />
                 </el-main>
 </el-container>

@@ -14,9 +14,7 @@ const store = useComponentStore()
 const { componentList } = storeToRefs(store)
 const { addComponent, removeComponent, componentRefs, componentHeights, updateComponent } = store
 const resumeStore = useResumeStore()
-const props = defineProps<{
-  id: string
-}>()
+import router from '../router'
 const componentData = new Map<string, any>()
 
 const {createNewResume} = useResumeStore()
@@ -100,12 +98,19 @@ const computedPages = computed<ResumePage[]>(() => {
     return pages.value
 })
 
+import { useRoute } from 'vue-router'
+const route = useRoute()
 onMounted(() => {
-    if(props.id){
-        const resume = resumeStore.resumeList.find((r: ResumeData) => r.id === props.id)
+    if(route.query.id){
+        const resume = resumeStore.resumeList.find((r: ResumeData) => r.id === route.query.id)
         if (resume) {
             componentList.value = resume.content
+            resumeStore.currentResumeId = route.query.id as string
+            console.log(resumeStore.currentResumeId)
         }
+    }
+    if(resumeStore.currentResumeId === ''){
+        router.push({ path: '/myResume' })
     }
     nextTick(() => {
         if (resumePagesRef.value) {

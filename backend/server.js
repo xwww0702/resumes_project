@@ -41,6 +41,7 @@ app.post('/api/resume', validateResumeData, async (req, res) => {
         if (existingResume) {
             // 如果存在，更新内容
             existingResume.content = content
+            existingResume.title = title
             existingResume.updatedAt = new Date()
             await existingResume.save()
             res.json({ success: true, data: existingResume })

@@ -42,4 +42,6 @@ export const useResumeStore = defineStore('resume', () => {
         switchResume,
         init
     }
-}) 
+}, {
+    persist: true
+  }) 

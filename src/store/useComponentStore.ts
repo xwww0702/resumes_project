@@ -69,4 +69,6 @@ export const useComponentStore = defineStore('component', () => {
         removeComponent,
         selectComponent
     }
-})
+}, {
+    persist: true
+  })

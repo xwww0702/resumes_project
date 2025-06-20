@@ -58,6 +58,7 @@ declare module 'vue' {
     ResumePreview: typeof import('./src/components/ResumePreview.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    Title: typeof import('./src/components/Title.vue')['default']
     TitlePreview: typeof import('./src/components/preview/TitlePreview.vue')['default']
   }
 }

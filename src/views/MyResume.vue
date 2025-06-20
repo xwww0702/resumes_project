@@ -58,7 +58,7 @@ const handleDelete = (index: number, row: ResumeData) => {
 }
 const handleEdit = (index: number, row: ResumeData) => {
   console.log(index, row)
-  router.push({ path: '/', query: { id:row.id } })
+  router.push({ path: '/Home', query: { id:row.id, title:row.title } })
 }
 </script>
 
