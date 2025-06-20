@@ -221,7 +221,7 @@ defineExpose({
             class="w-fit mx-auto origin-top"
             :style="{ transform: `scale(${scale})` }"
         >
-            <div class="flex flex-col" ref="resumePagesRef">
+            <div class="flex flex-col" ref="resumePagesRef"  id="resume-preview">
                 <div
                     v-for="(page, index) in computedPages"
                     :key="index"
@@ -235,7 +235,7 @@ defineExpose({
                             v-for="component in page.components"
                             :key="component.id"
                             class="relative group"
-                            :ref="el => setComponentRef(component.id, el as HTMLElement)"
+                            :ref="(el )=> setComponentRef(component.id, el as HTMLElement)"
                             @click="handleComponentClick(component)"
                         >
                             <CommonPreview

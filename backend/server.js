@@ -1,7 +1,6 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
-
 const app = express()
 
 // 中间件
@@ -90,7 +89,6 @@ app.get('/api/resume/:id', async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error' })
     }
 })
-
 
 // 错误处理中间件
 app.use((err, req, res, next) => {

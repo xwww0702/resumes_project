@@ -4,18 +4,19 @@ import router from '../router'
 import { useSaveResume } from '../service/saveResume'
 import { useComponentStore } from '../store/useComponentStore'
 import { useResumeStore } from '../store/useResumeStore'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const store = useComponentStore()
 const resumeStore = useResumeStore()
 const { saveResume } = useSaveResume()
 const { createNewResume } = resumeStore
-
+import {exportPDF} from '../hooks/useExport'
 const newResume = ()=>{
     createNewResume()
     router.push('/')
 }
 
-console.log(resumeStore.currentResumeTitle);
 
 </script>
 
@@ -30,7 +31,7 @@ console.log(resumeStore.currentResumeTitle);
             <el-button type="warning" plain class="flex items-center" @click="saveData(store.componentList, saveResume, resumeStore.currentResumeId,resumeStore.currentResumeTitle)">
                 <span>保存</span>
             </el-button>
-            <el-button type="warning" class="flex items-center">
+            <el-button type="warning" class="flex items-center" :disabled="!route.query.id" @click="exportPDF">
                 <span>导出 PDF</span>
             </el-button>
             <el-button type="warning" class="flex items-center" @click = newResume>
