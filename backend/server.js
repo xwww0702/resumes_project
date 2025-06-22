@@ -115,7 +115,27 @@ app.delete('/api/resume/:id', async (req, res) => {
     }
   });
 
+  const ComponentTemplate = require('./componentTemplate')
 
+  app.post('/api/component-template', async (req, res) => {
+    try {
+      const {  defaultFields } = req.body
+      if ( !defaultFields ) return res.status(400).json({ message: '参数不完整' })
+      const doc = await ComponentTemplate.create({ defaultFields })
+      res.json({ success: true, data: doc })
+    } catch (err) {
+      res.status(500).json({ success: false, message: err.message })
+    }
+  })
+  // 获取所有组件模板
+app.get('/api/component-template', async (req, res) => {
+    try {
+      const list = await ComponentTemplate.find()
+      res.json({ success: true, data: list })
+    } catch (err) {
+      res.status(500).json({ success: false, message: err.message })
+    }
+  })
 // 错误处理中间件
 app.use((err, req, res, next) => {
     console.error('❌ Server error:', err)

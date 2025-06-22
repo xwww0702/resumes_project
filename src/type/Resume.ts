@@ -1,7 +1,7 @@
 import type { Component } from 'vue'
 
 // 组件类型
-export type ResumeComponentType = 'basic' | 'image-left' | 'content' | 'title' |'image-right'
+export type ResumeComponentType = 'basic' | 'image-left' | 'content' | 'title' |'image-right'|any
 
 // 字段类型
 export type FieldType = 'text' | 'textarea' | 'image'

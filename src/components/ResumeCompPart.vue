@@ -27,7 +27,7 @@ watch(() => store.selectedComponent, (newVal) => {
 </script>
 
 <template>
-    <div class="h-full flex flex-col bg-white border-r border-gray-200">
+    <div class="h-full flex flex-col bg-white border-r border-gray-200 mb-10">
         <el-tabs 
             v-model="activeTab" 
             class="flex-1 flex flex-col ml-1"
@@ -39,7 +39,13 @@ watch(() => store.selectedComponent, (newVal) => {
             >
                 <MarketPart @select="handleComponentSelect" />
             </el-tab-pane>
-            
+            <el-tab-pane 
+                label="新建组件" 
+                name="new"
+                class="h-full"
+            >
+            <FieldManager/>
+            </el-tab-pane>
             <el-tab-pane 
                 label="编辑面板" 
                 name="editor"
@@ -47,6 +53,7 @@ watch(() => store.selectedComponent, (newVal) => {
             >
                 <EditPart />
             </el-tab-pane>
+            
         </el-tabs>
     </div>
 </template>

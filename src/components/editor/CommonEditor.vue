@@ -51,20 +51,22 @@ const handleContentChange = (fieldsConfig: ComponentField[]) => {
 </script>
 
 <template>
-    <div class="editor-container">
+    <div class="editor-container mb-10">
         <div class="editor-form">
-
+            <!-- <FieldManager :modelValue="fieldsConfig"/> -->
+            <Layout 
+            :type="component?.type || ''"
+            :fields-config="fieldsConfig"
+            @layout-change="handleLayoutChange"
+        />
             <ContentEditor 
                 :fieldsConfig="fieldsConfig"
                 @submit="handleContentChange"
             />
         </div>
 
-        <Layout 
-            :type="component?.type"
-            :fields-config="fieldsConfig"
-            @layout-change="handleLayoutChange"
-        />
+       
+        
     </div>
 </template>
 

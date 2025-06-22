@@ -1,3 +1,4 @@
+import { ElMessage } from "element-plus"
 import type { ResumeComponent } from "../type/Resume"
 
 export const saveData = async (componentList:ResumeComponent[],saveResume:Function,currentResumeId:string,currentResumeTitle:string) => {
@@ -14,8 +15,10 @@ export const saveData = async (componentList:ResumeComponent[],saveResume:Functi
     console.log(resumeData,'resumeData')
     try {
         await saveResume(resumeData)
+        ElMessage.success('保存成功')
     } catch (error: any) {
         console.error('Save failed:', error.response?.data || error)
+        ElMessage.error('保存失败')
     }
 }
   

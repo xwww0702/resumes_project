@@ -1,47 +1,68 @@
 <template>
-    <div class="field-manager">
+    <div class="field-manager mb-5">
         <div class="field-list">
             <div v-for="(field, index) in fields" :key="field.key" class="field-item">
                 <el-form-item :label="'字段 ' + (index + 1)">
                     <div class="field-controls">
-                        <el-input v-model="field.label" placeholder="字段名称" class="field-label" />
-                        <el-select v-model="field.type" placeholder="字段类型" class="field-type">
-                            <el-option label="文本" value="text" />
-                            <el-option label="多行文本" value="textarea" />
-                            <el-option label="图片" value="image" />
-                            <el-option label="日期" value="date" />
-                            <el-option label="数字" value="number" />
-                            <el-option label="列表" value="list" />
-                        </el-select>
-                        <el-input-number v-model="field.span" :min="1" :max="2" label="宽度" class="field-span" />
-                        <el-input-number v-model="field.row" :min="1" :max="3" label="行数" class="field-row" />
-                        <el-input v-model="field.placeholder" placeholder="占位文本" class="field-placeholder" />
+                        <div class="field-row">
+                            <span class="field-label">字段名称</span>
+                            <el-input v-model="field.label" placeholder="字段名称" class="field-input" />
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label">字段类型</span>
+                            <el-select v-model="field.type" placeholder="字段类型" class="field-input">
+                                <el-option label="文本" value="text" />
+                                <el-option label="多行文本" value="textarea" />
+                                <!-- <el-option label="图片" value="image" /> -->
+                                <el-option label="日期" value="date" />
+                                <el-option label="数字" value="number" />
+                                <el-option label="列表" value="list" />
+                            </el-select>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label">宽度</span>
+                            <el-input-number v-model="field.span" :min="1" :max="2" class="field-input" />
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label">行数</span>
+                            <el-input-number v-model="field.row" :min="1" :max="3" class="field-input" />
+                        </div>
+                        <!-- <el-input v-model="field.placeholder" placeholder="占位文本" class="field-placeholder" /> -->
                         <el-button type="danger" @click="removeField(index)" class="field-remove">删除</el-button>
                     </div>
                 </el-form-item>
             </div>
         </div>
         <el-button type="primary" @click="addField" class="add-field-btn">添加字段</el-button>
+        <el-button type="primary" @click="saveField" class="add-field-btn">保存至组件市场</el-button>
     </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import type { ComponentField } from '../../type/Resume'
+import { saveComponentTemplate } from '../../service/request'
+import { ElMessage } from 'element-plus'
 
-const props = defineProps<{
-    modelValue: ComponentField[]
-}>()
+// const props = defineProps<{
+//     modelValue: ComponentField[]
+// }>()
 
-const emit = defineEmits<{
-    (e: 'update:modelValue', value: ComponentField[]): void
-}>()
+// const emit = defineEmits<{
+//     (e: 'update:modelValue', value: ComponentField[]): void
+// }>()
 
-const fields = ref<ComponentField[]>(props.modelValue)
-
-watch(fields, (newValue) => {
-    emit('update:modelValue', newValue)
-}, { deep: true })
+const fields = ref<ComponentField[]>([])
+// watch(
+//   () => props.modelValue,
+//   (newVal) => {
+//     fields.value = [...newVal]
+//   },
+//   { deep: true }
+// )
+// watch(fields, (newValue) => {
+//     emit('update:modelValue', newValue)
+// }, { deep: true })
 
 const addField = () => {
     const newField: ComponentField = {
@@ -58,6 +79,17 @@ const addField = () => {
 
 const removeField = (index: number) => {
     fields.value.splice(index, 1)
+}
+const saveField = async () => {
+  const name = prompt('请输入模板名称')
+  if (!name) return
+  try {
+    await saveComponentTemplate(fields.value)
+    ElMessage.success('保存成功')
+    fields.value = []
+  } catch (e) {
+    ElMessage.error('保存失败')
+  }
 }
 </script>
 
@@ -85,21 +117,21 @@ const removeField = (index: number) => {
     align-items: start;
 }
 
-.field-label {
-    grid-column: span 2;
-}
-
-.field-type {
-    grid-column: span 1;
-}
-
-.field-span,
 .field-row {
-    grid-column: span 1;
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
 }
 
-.field-placeholder {
-    grid-column: span 2;
+.field-label {
+    min-width: 60px;
+    margin-right: 8px;
+    color: #606266;
+    font-size: 14px;
+}
+
+.field-input {
+    flex: 1;
 }
 
 .field-remove {
@@ -108,8 +140,8 @@ const removeField = (index: number) => {
 }
 
 .add-field-btn {
-    width: 100%;
-    margin-top: 16px;
+    width: 30%;
+    margin-top: 5px;
 }
 
 :deep(.el-form-item__label) {

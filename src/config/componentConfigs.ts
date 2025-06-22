@@ -7,10 +7,10 @@ const componentConfigs = reactive<Record<ResumeComponentType, ComponentConfig>>(
         description: '包含姓名、年龄等基本信息的组件',
         icon: 'user',
         defaultFields: [
-            { key: 'name', label: '姓名', type: 'text', span: 1, row: 1, placeholder: '请输入姓名', value: '' },
-            { key: 'age', label: '年龄', type: 'text', span: 1, row: 1, placeholder: '请输入年龄', value: '' },
-            { key: 'phone', label: '电话', type: 'text', span: 1, row: 1, placeholder: '请输入电话', value: '' },
-            { key: 'email', label: '邮箱', type: 'text', span: 1, row: 2, placeholder: '请输入邮箱', value: '' }
+            { key: 'name', label: 'field1', type: 'text', span: 1, row: 1, placeholder: '请输入内容', value: '' },
+            { key: 'age', label: 'field1', type: 'text', span: 1, row: 1, placeholder: '请输入内容', value: '' },
+            { key: 'phone', label: 'field1', type: 'text', span: 1, row: 1, placeholder: '请输入内容', value: '' },
+            { key: 'email', label: 'field1', type: 'text', span: 1, row: 2, placeholder: '请输入内容', value: '' }
         ]
     },
     'image-left': {
