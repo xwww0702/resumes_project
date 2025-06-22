@@ -1,7 +1,7 @@
 import type { Component } from 'vue'
 
 // 组件类型
-export type ResumeComponentType = 'basic' | 'image-left' | 'content' | 'title' |'image-right'|any
+export type ResumeComponentType = 'basic' | 'image-left' | 'content' | 'title' |'image-right'|'user'
 
 // 字段类型
 export type FieldType = 'text' | 'textarea' | 'image'
@@ -32,6 +32,7 @@ export interface ComponentConfig {
     description: string
     align?:string
     icon?: string
+    id:string
     defaultFields: ComponentField[]
 }
 

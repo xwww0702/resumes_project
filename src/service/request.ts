@@ -21,8 +21,8 @@ export function getAllResume(userId: string, signal?: AbortSignal) {
 export function deleteResume(id: string, userId: string) {
   return request.delete(`/resume/${id}`, { params: { userId } });
 }
-export function saveComponentTemplate( fields: any[]) {
-  return request.post('/component-template', {  defaultFields:fields })
+export function saveComponentTemplate( config: {}) {
+  return request.post('/component-template', { config })
 }
 
 export function getComponentTemplateList() {

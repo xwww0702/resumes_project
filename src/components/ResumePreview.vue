@@ -181,14 +181,10 @@ const updateComponentData = (id: string, data: any) => {
     componentData.set(id, data)
 }
 
-const emit = defineEmits<{
-    (e: 'edit', component: ResumeComponent): void
-}>()
 
 const handleComponentClick = (component: ResumeComponent) => {
+    console.log(component);
     store.selectComponent(component)
-    emit('edit', component)
-    
 }
 
 watch(() => componentList, () => {

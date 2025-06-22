@@ -1,7 +1,7 @@
 // 组件市场数据
 
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
 import type { ResumeComponent } from '../type/Resume'
 import componentConfigs from '../config/componentConfigs'
 
@@ -11,9 +11,12 @@ export const useComponentStore = defineStore('component', () => {
     const activeTab = ref('components')
     const componentRefs = new Map<string, HTMLElement>()
     const componentHeights = new Map<string, number>()
+    const componentConfigsAll = reactive({...componentConfigs})
 
     function addComponent(type: ResumeComponent['type']) {
-        const config = componentConfigs[type]
+        const config = componentConfigsAll[type]
+        console.log(config,'config');
+        
         if (!config) {
             console.error(`Component type ${type} not found`)
             return null

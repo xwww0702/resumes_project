@@ -1,7 +1,7 @@
 <template>
     <div class="field-manager mb-5">
         <div class="field-list">
-            <div v-for="(field, index) in fields" :key="field.key" class="field-item">
+            <div v-for="(field, index) in defaultFields" :key="field.key" class="field-item">
                 <el-form-item :label="'字段 ' + (index + 1)">
                     <div class="field-controls">
                         <div class="field-row">
@@ -52,7 +52,7 @@ import { ElMessage } from 'element-plus'
 //     (e: 'update:modelValue', value: ComponentField[]): void
 // }>()
 
-const fields = ref<ComponentField[]>([])
+const defaultFields = ref<ComponentField[]>([])
 // watch(
 //   () => props.modelValue,
 //   (newVal) => {
@@ -67,26 +67,31 @@ const fields = ref<ComponentField[]>([])
 const addField = () => {
     const newField: ComponentField = {
         key: `field-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        label: `字段${fields.value.length + 1}`,
+        label: `字段${defaultFields.value.length + 1}`,
         type: 'text',
         span: 2,
         row: 1,
         placeholder: '请输入内容',
         value: ''
     }
-    fields.value.push(newField)
+    defaultFields.value.push(newField)
 }
 
 const removeField = (index: number) => {
-    fields.value.splice(index, 1)
+    defaultFields.value.splice(index, 1)
 }
 const saveField = async () => {
-  const name = prompt('请输入模板名称')
-  if (!name) return
   try {
-    await saveComponentTemplate(fields.value)
+    await saveComponentTemplate({
+        
+        defaultFields:defaultFields.value,
+        type:'user',
+        title:'userConfig',
+    
+    
+    })
     ElMessage.success('保存成功')
-    fields.value = []
+    defaultFields.value = []
   } catch (e) {
     ElMessage.error('保存失败')
   }

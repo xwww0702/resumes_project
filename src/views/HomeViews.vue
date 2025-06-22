@@ -9,10 +9,6 @@ const asideWidth = ref(500)
 const previewRef = ref()
 const store = useComponentStore()
 
-const handleEdit = (component: ResumeComponent) => {
-    store.selectComponent(component)
-}
-
 </script>
 
 
@@ -27,7 +23,6 @@ const handleEdit = (component: ResumeComponent) => {
                 <el-main>
                     <ResumePreview 
                         ref="previewRef"
-                        @edit="handleEdit"
                     />
                 </el-main>
 </el-container>
@@ -71,7 +66,7 @@ const handleEdit = (component: ResumeComponent) => {
 
 :deep(.el-aside) {
     height: calc(100vh - 60px);
-    overflow: hidden;
+    overflow: auto;
 }
 
 :deep(.el-main) {

@@ -119,9 +119,9 @@ app.delete('/api/resume/:id', async (req, res) => {
 
   app.post('/api/component-template', async (req, res) => {
     try {
-      const {  defaultFields } = req.body
-      if ( !defaultFields ) return res.status(400).json({ message: '参数不完整' })
-      const doc = await ComponentTemplate.create({ defaultFields })
+      const {  config } = req.body
+      if ( !config ) return res.status(400).json({ message: '参数不完整' })
+      const doc = await ComponentTemplate.create({ config })
       res.json({ success: true, data: doc })
     } catch (err) {
       res.status(500).json({ success: false, message: err.message })
