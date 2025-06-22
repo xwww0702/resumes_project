@@ -107,6 +107,9 @@ onMounted(() => {
             componentList.value = resume.content
             resumeStore.currentResumeId = route.query.id as string
             console.log(resumeStore.currentResumeId)
+        }else{
+            componentList.value = []
+            resumeStore.currentResumeId = route.query.id as string
         }
     }
     if(resumeStore.currentResumeId === ''){

@@ -28,11 +28,16 @@ import { userGetAllResume } from '../service/saveResume'
 import { useResumeStore } from '../store/useResumeStore'
 import type { ResumeData } from '../type/Resume'
 import router from '../router'
+import { deleteResume } from '../service/request'
 const loading = ref(true)
 const currentDate = new Date().toDateString()
 const { fetchData } = userGetAllResume('user123')
 const { resumeList } = toRefs(useResumeStore())
-onMounted(async () => {
+onMounted( () => {
+  getData()
+})
+
+const getData = async()=>{
   let res = []
   try { res = await fetchData()
     console.log(res)
@@ -41,9 +46,7 @@ onMounted(async () => {
     console.error(err)
   }
   resumeList.value = res as ResumeData[]
-})
-
-
+}
 
 const search = ref('')
 const filterTableData = computed(() =>
@@ -53,8 +56,10 @@ resumeList.value.filter(
       data.title.toLowerCase().includes(search.value.toLowerCase())
   )
 )
-const handleDelete = (index: number, row: ResumeData) => {
+const handleDelete = async (index: number, row: ResumeData) => {
   console.log(index, row)
+  await deleteResume(row.id,row.userId)
+  getData()
 }
 const handleEdit = (index: number, row: ResumeData) => {
   console.log(index, row)

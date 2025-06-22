@@ -18,3 +18,6 @@ export function getAllResume(userId: string, signal?: AbortSignal) {
   
   return request.get(`/resumes/${userId}`, { signal })
 }
+export function deleteResume(id: string, userId: string) {
+  return request.delete(`/resume/${id}`, { params: { userId } });
+}

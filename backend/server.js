@@ -90,6 +90,30 @@ app.get('/api/resume/:id', async (req, res) => {
     }
 })
 
+// 删除简历
+app.delete('/api/resume/:id', async (req, res) => {
+    try {
+      const { userId } = req.query;
+      const { id } = req.params;
+  
+      if (!userId) {
+        return res.status(400).json({ success: false, message: 'Missing userId' });
+      }
+  
+      const deleted = await Resume.findOneAndDelete({ id, userId });
+  
+      if (!deleted) {
+        return res.status(404).json({ success: false, message: 'Resume not found' });
+      }
+  
+      res.json({ success: true, message: 'Resume deleted successfully' });
+    } catch (err) {
+      console.error('❌ Failed to delete resume:', err);
+      res.status(500).json({ success: false, message: 'Server error' });
+    }
+  });
+
+
 // 错误处理中间件
 app.use((err, req, res, next) => {
     console.error('❌ Server error:', err)

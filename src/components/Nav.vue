@@ -13,8 +13,16 @@ const { saveResume } = useSaveResume()
 const { createNewResume } = resumeStore
 import {exportPDF} from '../hooks/useExport'
 const newResume = ()=>{
-    createNewResume()
-    router.push('/')
+    let newid = createNewResume()
+    console.log(newid);
+    
+    router.push({
+        path: '/Home',
+        query: {
+            id: newid,
+            title: '未命名简历'
+        }
+        })
 }
 
 
