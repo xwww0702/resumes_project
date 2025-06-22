@@ -5,7 +5,9 @@ const app = express()
 
 // 中间件
 app.use(cors())
-app.use(express.json())
+// app.use(express.json())
+app.use(express.json({ limit: '10mb' }))
+app.use(express.urlencoded({ limit: '10mb', extended: true }))
 
 // 数据库连接
 mongoose.connect('mongodb://localhost:27017/resumes', {
