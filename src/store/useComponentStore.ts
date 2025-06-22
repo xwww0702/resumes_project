@@ -1,7 +1,7 @@
 // 组件市场数据
 
 import { defineStore } from 'pinia'
-import { reactive, ref } from 'vue'
+import {  ref } from 'vue'
 import type { ResumeComponent } from '../type/Resume'
 import componentConfigs from '../config/componentConfigs'
 
@@ -11,11 +11,9 @@ export const useComponentStore = defineStore('component', () => {
     const activeTab = ref('components')
     const componentRefs = new Map<string, HTMLElement>()
     const componentHeights = new Map<string, number>()
-    const componentConfigsAll = reactive({...componentConfigs})
 
     function addComponent(type: ResumeComponent['type']) {
-        const config = componentConfigsAll[type]
-        console.log(config,'config');
+        const config = componentConfigs[type]
         
         if (!config) {
             console.error(`Component type ${type} not found`)
@@ -29,7 +27,7 @@ export const useComponentStore = defineStore('component', () => {
             align:config.align,
             fields: config.defaultFields.map(field => ({
                 ...field,
-                key: field.key || `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+                key: `${field.key}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
             }))
         }
 
@@ -41,10 +39,15 @@ export const useComponentStore = defineStore('component', () => {
     function updateComponent(id: string, data: Partial<ResumeComponent>) {
         const index = componentList.value.findIndex(c => c.id === id)
         if (index !== -1) {
-            componentList.value[index] = {
+            // 1. 合并新旧数据，更新 componentList 中的原始组件
+            const updatedComponent = {
                 ...componentList.value[index],
                 ...data
             }
+            componentList.value[index] = updatedComponent
+            
+            // 2. (关键修复) 同时，用更新后的数据刷新 selectedComponent 副本
+            selectedComponent.value = JSON.parse(JSON.stringify(updatedComponent));
         }
     }
 
@@ -58,7 +61,12 @@ export const useComponentStore = defineStore('component', () => {
     }
 
     function selectComponent(component: ResumeComponent | null) {
-        selectedComponent.value = component
+        if (component) {
+            // (关键修复) 使用深拷贝创建副本，防止直接修改原始状态
+            selectedComponent.value = JSON.parse(JSON.stringify(component));
+        } else {
+            selectedComponent.value = null;
+        }
     }
 
     return {

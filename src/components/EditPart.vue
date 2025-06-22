@@ -16,19 +16,15 @@ const currentConfig = computed(() => {
 })
 
 
-// 处理表单提交
+// 处理表单提交 需要做防抖处理
 const handleSubmit = (fields: ComponentField[]) => {
     if (selectedComponent.value) {
-        // 确保保留所有字段属性，包括样式属性
-        const updatedFields = fields.map(field => ({
-            ...field,
-            value: selectedComponent.value?.fields?.find(f => f.key === field.key)?.value || field.value || '',
-            isBold: field.isBold || false,
-            isItalic: field.isItalic || false
-        }))
+        // 现在我们只需要传递包含更新后字段的对象即可
+        // store 会负责合并和刷新
+        // console.log(fields,fields[0].listStyle);
         
         store.updateComponent(selectedComponent.value.id, {
-            fields: updatedFields
+            fields: fields
         })
     }
 }
@@ -49,28 +45,28 @@ const handleLayoutChange = (fields: ComponentField[]) => {
 }
 
 // 监听选中组件变化，确保字段值正确初始化
-watch(selectedComponent, (newComponent) => {
-    if (newComponent && currentConfig.value) {
-        // 确保组件有所有必要的字段
-        const existingFields = newComponent.fields || []
-        const defaultFields = currentConfig.value.defaultFields
+// watch(selectedComponent, (newComponent) => {
+//     if (newComponent && currentConfig.value) {
+//         // 确保组件有所有必要的字段
+//         const existingFields = newComponent.fields || []
+//         const defaultFields = currentConfig.value.defaultFields
         
-        // 合并现有字段和默认字段
-        const mergedFields = defaultFields.map(defaultField => {
-            const existingField = existingFields.find(f => f.key === defaultField.key)
-            return {
-                ...defaultField,
-                ...existingField,
-                value: existingField?.value || defaultField.value || ''
-            }
-        })
+//         // 合并现有字段和默认字段
+//         const mergedFields = defaultFields.map(defaultField => {
+//             const existingField = existingFields.find(f => f.key === defaultField.key)
+//             return {
+//                 ...defaultField,
+//                 ...existingField,
+//                 value: existingField?.value || defaultField.value || ''
+//             }
+//         })
         
-        // 更新组件字段
-        store.updateComponent(newComponent.id, {
-            fields: mergedFields
-        })
-    }
-}, { immediate: true })
+//         // 更新组件字段
+//         store.updateComponent(newComponent.id, {
+//             fields: mergedFields
+//         })
+//     }
+// }, { immediate: true })
 
 
 </script>

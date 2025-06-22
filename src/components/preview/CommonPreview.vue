@@ -63,7 +63,44 @@ const groupedFields = computed(() => {
                                     </template>
                                 </template>
                                 <template v-if="field.type === 'textarea'">
-                                    <div class="whitespace-pre-wrap leading-relaxed">{{ field.value || field.placeholder }}</div>
+                                    <template v-if="field.listStyle !== 'none'">
+                                        <ul :class="{
+                                            'list-disc ml-4': field.listStyle === 'disc',
+                                            'list-decimal ml-4': field.listStyle === 'decimal'
+                                        }" >
+                                            <li class="whitespace-pre-wrap leading-relaxed text-gray-800"
+                                                :class="{
+                                                    'font-bold': field.isBold,
+                                                    'italic': field.isItalic
+                                                }"
+                                            >
+                                                {{ field.value || field.placeholder}}
+                                            </li>
+                                        </ul>
+                                    </template>
+                                    <template v-else>
+                                        <div 
+                                            class="whitespace-pre-wrap leading-relaxed text-gray-800"
+                                            :class="{
+                                                'font-bold': field.isBold,
+                                                'italic': field.isItalic
+                                            }"
+                                        >
+                                            {{ field.value || field.placeholder}}
+                                        </div>
+                                    </template>
+                                </template>
+                                <template v-if="field.type === 'time'">
+                                    <div class="whitespace-pre-wrap leading-relaxed">
+                                        <template v-if="typeof field.value === 'object' && field.value !== null && ('start' in field.value || 'end' in field.value)">
+                                            <span>{{ field.value.start || '至今' }}</span>
+                                            <span v-if="field.value.start && field.value.end"> — </span>
+                                            <span>{{ field.value.end }}</span>
+                                        </template>
+                                        <template v-else>
+                                            {{ field.placeholder }}
+                                        </template>
+                                    </div>
                                 </template>
                             </span>
                         </div>

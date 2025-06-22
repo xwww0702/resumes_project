@@ -39,12 +39,6 @@ watch(() => store.selectedComponent, (newVal) => {
                 <MarketPart @select="handleComponentSelect" />
             </el-tab-pane>
             <el-tab-pane 
-                label="新建组件" 
-                name="new"
-            >
-            <FieldManager/>
-            </el-tab-pane>
-            <el-tab-pane 
                 label="编辑面板" 
                 name="editor"
             >

@@ -1,10 +1,10 @@
 import type { Component } from 'vue'
 
 // 组件类型
-export type ResumeComponentType = 'basic' | 'image-left' | 'content' | 'title' |'image-right'|'user'
+export type ResumeComponentType = 'basic' | 'image-left' | 'content' | 'title' |'image-right'|'content-time'|'education'|'basic-time'
 
 // 字段类型
-export type FieldType = 'text' | 'textarea' | 'image'
+export type FieldType = 'text' | 'textarea' | 'image' | 'time'
 
 // 预览组件类型
 export type PreviewComponentType = 'BasicInfoPreview' | null
@@ -14,7 +14,7 @@ export interface ComponentField {
     key: string
     label: string
     type: FieldType
-    value?: string
+    value?: string | object
     span?: number
     row?: number
     placeholder?: string
@@ -32,7 +32,7 @@ export interface ComponentConfig {
     description: string
     align?:string
     icon?: string
-    id:string
+    // id:string
     defaultFields: ComponentField[]
 }
 

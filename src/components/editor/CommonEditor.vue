@@ -12,7 +12,6 @@ const emit = defineEmits<{
     (e: 'submit', data: ComponentField[]): void
 }>()
 
-// const { fieldsConfig } = toRefs(useEditStore())
 const fieldsConfig = ref<ComponentField[]>([])
 const formData = ref<Record<string, any>>({})
 const formRef = ref()
@@ -24,7 +23,7 @@ watch(() => props.component?.fields, (newFields) => {
             ...field,
             row: field.row || 1,
             span: field.span || 1,
-            listStyle : 'none'
+            listStyle: field.listStyle || 'none'
         }))
         // 初始化表单数据
         formData.value = newFields.reduce((acc, field) => {
@@ -39,7 +38,6 @@ watch(() => props.component?.fields, (newFields) => {
 
 // 处理布局更新
 const handleLayoutChange = (updatedFields: ComponentField[]) => {
-    fieldsConfig.value = updatedFields
     emit('submit', updatedFields)
 }
 

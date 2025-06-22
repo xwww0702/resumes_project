@@ -106,7 +106,6 @@ onMounted(() => {
         if (resume) {
             componentList.value = resume.content
             resumeStore.currentResumeId = route.query.id as string
-            console.log(resumeStore.currentResumeId)
         }else{
             componentList.value = []
             resumeStore.currentResumeId = route.query.id as string
@@ -183,7 +182,6 @@ const updateComponentData = (id: string, data: any) => {
 
 
 const handleComponentClick = (component: ResumeComponent) => {
-    console.log(component);
     store.selectComponent(component)
 }
 

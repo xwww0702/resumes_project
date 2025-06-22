@@ -3,6 +3,7 @@ import { ref, watch } from 'vue'
 import type { ComponentField } from '../../type/Resume'
 import { useStyleChange } from '../../hooks/useStyleChange'
 import ImageEditor from './ImageEditor.vue'
+import { Brush } from '@element-plus/icons-vue'
 
 const props = defineProps<{
     fieldsConfig: ComponentField[]
@@ -13,6 +14,7 @@ const emit = defineEmits<{
 }>()
 
 const { toggleBold, toggleItalic, toggleListStyle } = useStyleChange()
+
 
 const handleContentChange = (fieldsConfig: ComponentField[]) => {
     emit('submit', fieldsConfig)
@@ -27,10 +29,10 @@ const handleImageUpdate = (field: ComponentField, value: string) => {
 
 <template>
     <div class="editor-form">
-        <div v-for="field in fieldsConfig" :key="field.key" class="field-item">
+        <div v-for="(field,index) in fieldsConfig" :key="field.key" class="field-item">
             <div class="field-header">
                 <span class="field-label">{{ field.label }}</span>
-                <div class="style-controls" v-if="field.type === 'text'">
+                <div class="style-controls" v-if="field.type === 'text' || field.type === 'textarea'">
                     <el-tooltip content="加粗">
                         <el-button 
                             :type="field.isBold ? 'primary' : 'default'"
@@ -49,13 +51,15 @@ const handleImageUpdate = (field: ComponentField, value: string) => {
                             <el-icon>I</el-icon>
                         </el-button>
                     </el-tooltip>
-                    <el-tooltip :content="field.listStyle === 'disc' ? '圆点' : field.listStyle === 'decimal' ? '序号' : '无样式'">
+                    <el-tooltip :content="field.listStyle === 'disc' ? '圆点列表' : field.listStyle === 'decimal' ? '数字列表' : '无列表样式'">
                         <el-button 
                             :type="field.listStyle === 'none' ? 'default' : 'primary'"
                             size="small"
                             @click="toggleListStyle(field, fieldsConfig, emit)"
                         >
-                        <el-icon><Brush /></el-icon>
+                            <el-icon v-if="field.listStyle === 'disc'">●</el-icon>
+                            <el-icon v-else-if="field.listStyle === 'decimal'">1.</el-icon>
+                            <el-icon v-else><Brush /></el-icon>
                         </el-button>
                     </el-tooltip>
                 </div>
@@ -83,6 +87,27 @@ const handleImageUpdate = (field: ComponentField, value: string) => {
                     :rows="3"
                     @input="handleContentChange(fieldsConfig)"
                 />
+                <div v-else-if="field.type === 'time'" class="flex items-center space-x-2">
+                     <el-date-picker
+                        v-model="field.value.start"
+                        type="month"
+                        placeholder="开始月份"
+                        format="YYYY-MM"
+                        value-format="YYYY-MM"
+                        class="flex-1"
+                        @change="handleContentChange(fieldsConfig)"
+                    />
+                    <span>———</span>
+                    <el-date-picker
+                        v-model="field.value.end"
+                        type="month"
+                        placeholder="结束月份"
+                        format="YYYY-MM"
+                        value-format="YYYY-MM"
+                        class="flex-1"
+                        @change="handleContentChange(fieldsConfig)"
+                    />
+                </div>
             </template>
         </div>
     </div>
