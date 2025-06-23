@@ -19,7 +19,7 @@ const componentConfigs = reactive<Record<ResumeComponentType, ComponentConfig>>(
         defaultFields: [
             { key: 'basic-name', label: 'field1', type: 'text', span: 1, row: 1, placeholder: '请输入内容', value: '' },
             { key: 'basic-age', label: 'field1', type: 'text', span: 1, row: 1, placeholder: '请输入内容', value: '' },
-            { key: 'basic-phone', label: 'field1', type: 'time', span: 1, row: 1, placeholder: '请选择时间', value: { start: '', end: '' } },
+            { key: 'basic-phone', label: 'field1', type: 'time', span: 1, row: 1, placeholder: '请选择时间', value: {  } },
         ]
     },
     'image-left': {

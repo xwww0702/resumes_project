@@ -78,14 +78,13 @@ const showBorder = ref(true)
                                 <el-icon>I</el-icon>
                             </el-button>
                         </el-tooltip>
-                        <el-tooltip :content="field.listStyle === 'disc' ? '圆点列表' : field.listStyle === 'decimal' ? '数字列表' : '无列表样式'">
+                        <el-tooltip :content="field.listStyle === 'disc' ? '圆点列表' :  '无列表样式'">
                             <el-button 
                                 :type="field.listStyle === 'none' ? 'default' : 'primary'"
                                 size="small"
                                 @click="toggleListStyle(field, fieldsConfig, emit)"
                             >
                                 <el-icon v-if="field.listStyle === 'disc'">●</el-icon>
-                                <el-icon v-else-if="field.listStyle === 'decimal'">1.</el-icon>
                                 <el-icon v-else><Brush /></el-icon>
                             </el-button>
                         </el-tooltip>

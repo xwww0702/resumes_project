@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import type { ResumeComponentType, ComponentField } from '../../type/Resume'
 
 const props = defineProps<{
@@ -22,10 +22,11 @@ const groupedFields = computed(() => {
 
     return Object.values(groups)
 })
+const globalIndex = 1
 </script>
 
 <template>
-    <div class="pl-3 pr-3 rounded-lg bg-white relative" :class="props.border?'border-b border-gray-200':''">
+    <div class="pl-3 pr-3  bg-white relative" :class="props.border?'border-b border-gray-200':''">
         <div class="text-sm">
             <template v-for="(row, rowIndex) in groupedFields" :key="`row-${rowIndex}-${row.length}`">
                 <div class="preview-row">
@@ -36,11 +37,8 @@ const groupedFields = computed(() => {
                         >
                             <span class="flex-1 min-w-0 text-gray-700 text-sm leading-relaxed">
                                 <template v-if="field.type === 'text'">
-                                    <template v-if="field.listStyle !== 'none'">
-                                        <ul :class="{
-                                            'list-disc ml-4': field.listStyle === 'disc',
-                                            'list-decimal ml-4': field.listStyle === 'decimal'
-                                        }" >
+                                    <template v-if="field.listStyle == 'disc'">
+                                        <ul class= 'list-disc ml-4' >
                                             <li class="whitespace-pre-wrap leading-relaxed text-gray-800"
                                                 :class="{
                                                     'font-bold': field.isBold,
@@ -51,7 +49,7 @@ const groupedFields = computed(() => {
                                             </li>
                                         </ul>
                                     </template>
-                                    <template v-else>
+                                    <template v-if="field.listStyle === 'none'">
                                         <div 
                                             class="whitespace-pre-wrap leading-relaxed text-gray-800"
                                             :class="{

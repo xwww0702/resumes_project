@@ -30,13 +30,10 @@ export function useStyleChange() {
     }
 
     const toggleListStyle = (field: ComponentField, fieldsConfig: ComponentField[], emit: EmitType) => {
-        // 确保 listStyle 属性存在
-        if (!field.hasOwnProperty('listStyle')) {
-            field.listStyle = 'none';
-        }
-        
-        const styles: ('none' | 'disc' | 'decimal')[] = ['none', 'disc', 'decimal']
-        const currentIndex = styles.indexOf(field.listStyle || 'none')
+        // Only allow 'none' and 'disc' for listStyle
+        const styles: ('none' | 'disc')[] = ['none', 'disc']
+        const safeListStyle = styles.includes(field.listStyle as any) ? field.listStyle : 'none'
+        const currentIndex = styles.indexOf(safeListStyle as 'none' | 'disc')
         const nextIndex = (currentIndex + 1) % styles.length
         const oldStyle = field.listStyle
         field.listStyle = styles[nextIndex]
