@@ -5,6 +5,7 @@ import componentConfigs from '../config/componentConfigs'
 import { useComponentStore } from '../store/useComponentStore'
 import { storeToRefs } from 'pinia'
 import CommonEditor from './editor/CommonEditor.vue'
+import debounce from 'lodash/debounce'
 
 const store = useComponentStore()
 const { selectedComponent } = storeToRefs(store)
@@ -17,17 +18,13 @@ const currentConfig = computed(() => {
 
 
 // 处理表单提交 需要做防抖处理
-const handleSubmit = (fields: ComponentField[]) => {
+const handleSubmit = debounce((fields: ComponentField[]) => {
     if (selectedComponent.value) {
-        // 现在我们只需要传递包含更新后字段的对象即可
-        // store 会负责合并和刷新
-        // console.log(fields,fields[0].listStyle);
-        
         store.updateComponent(selectedComponent.value.id, {
             fields: fields
         })
     }
-}
+}, 500)
 
 // 处理布局变更
 const handleLayoutChange = (fields: ComponentField[]) => {
