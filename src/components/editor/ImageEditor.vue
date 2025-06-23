@@ -30,7 +30,7 @@ const {
     <div class="w-full">
         <div class="mb-4 border border-dashed border-gray-300 rounded-md overflow-hidden" :style="imageStyle">
             <img v-if="value" :src="value" class="w-full h-full object-cover" />
-            <div v-else class="w-full h-full flex flex-col items-center justify-center bg-gray-50 p-4">
+             <div v-else class="w-full h-full flex flex-col items-center justify-center bg-gray-50 p-4">
                 <div class="upload-button">
                     <input
                         type="file"
@@ -41,13 +41,16 @@ const {
                     <el-icon class="text-2xl text-gray-400 mb-2"><Upload /></el-icon>
                 </div>
             </div>
+           
         </div>
        
-            <el-button @click="showCropper = true">重新裁剪</el-button>
+            <el-button type="primary"size="small" @click="showCropper = true">重新裁剪</el-button>
+            <el-button v-if="value" type="danger" size="small"  @click="$emit('update', '')">删除图片</el-button>
+
         <el-dialog
             v-model="showCropper"
             title="裁剪图片"
-            width="600px"
+            width="50%"
             :close-on-click-modal="false"
         >
             <div class="h-[400px] bg-gray-50">
@@ -55,7 +58,7 @@ const {
                     ref="cropperRef"
                     :src="imageUrl"
                     :stencil-props="{
-                        aspectRatio: 1
+                        aspectRatio: 0.7
                     }"
                 />
             </div>
