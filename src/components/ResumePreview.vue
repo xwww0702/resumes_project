@@ -196,6 +196,13 @@ watch(() => componentList, () => {
     })
 }, { deep: true })
 
+const emit = defineEmits(['component-deleted'])
+
+const deleteComp = (id:string)=>{
+    removeComponent(id)
+    emit('component-deleted')
+}
+
 defineExpose({
     updateComponentData
 })
@@ -253,7 +260,7 @@ defineExpose({
                             />
                             <button 
                                 class="absolute top-2 right-2 w-5 h-5 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-85 hover:opacity-100 hover:bg-red-600 transition-colors flex items-center justify-center text-sm leading-none"
-                                @click.stop="removeComponent(component.id)"
+                                @click.stop="deleteComp(component.id)"
                             >×</button>
                         </div>
                     </div>

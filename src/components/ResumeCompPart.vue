@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import type { ResumeComponent } from '../type/Resume'
 import EditPart from './EditPart.vue'
 import MarketPart from './MarketPart.vue'
@@ -18,11 +18,21 @@ const handleComponentSelect = (component: ResumeComponent) => {
     store.selectComponent(component)
     activeTab.value = 'editor'
 }
+onMounted(()=>{
+    convertToMarket()
+})
 
+const convertToMarket = ()=>{
+    activeTab.value = 'components'
+}
 watch(() => store.selectedComponent, (newVal) => {
     if (newVal) {
         activeTab.value = 'editor'
     }
+})
+
+defineExpose({
+  convertToMarket
 })
 </script>
 

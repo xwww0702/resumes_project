@@ -8,7 +8,12 @@ import Title from '../components/Title.vue'
 const asideWidth = ref(500)
 const previewRef = ref()
 const store = useComponentStore()
-
+   const compPartRef = ref()
+const handleComponentDeleted = () => {
+    console.log(11);
+    
+     compPartRef.value?.convertToMarket?.()
+   }
 </script>
 
 
@@ -17,11 +22,12 @@ const store = useComponentStore()
 <Title/>
 <el-container class="main-container">
                 <el-aside :width="`${asideWidth}px`" class="resize-aside">
-                    <ResumeCompPart />
+                    <ResumeCompPart ref="compPartRef" />
                 </el-aside>
                 <div class="resize-handle" ></div>
                 <el-main>
                     <ResumePreview 
+                        @component-deleted="handleComponentDeleted"
                         ref="previewRef"
                     />
                 </el-main>
