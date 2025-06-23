@@ -13,25 +13,6 @@ export function useSaveResume() {
     const saveTimer = ref<number | null>(null)
     const isSaving = ref(false)
 
-    // const startAutoSave = (component: ResumeComponent) => {
-    //     // 清除之前的定时器
-    //     if (saveTimer.value) {
-    //         clearTimeout(saveTimer.value)
-    //     }
-
-    //     // 设置新的定时器
-    //     //需要更改title逻辑
-    //     saveTimer.value = window.setTimeout(() => {
-    //         const data: ResumeData = {
-    //             id: component.id,
-    //             userId: 'user123',
-    //             content: [component],
-    //             title: ''
-    //         }
-    //         saveResume(data)
-    //     }, 1000) // 1秒后自动保存
-    // }
-
     const saveResume = async (data: ResumeData) => {
         if (isSaving.value) return
 

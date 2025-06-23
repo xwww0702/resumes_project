@@ -12,6 +12,8 @@ const resumeStore = useResumeStore()
 const { saveResume } = useSaveResume()
 const { createNewResume } = resumeStore
 import {exportPDF} from '../hooks/useExport'
+import { ref, watch } from 'vue'
+import { ElMessage } from 'element-plus'
 const newResume = ()=>{
     let newid = createNewResume()
     console.log(newid);
@@ -24,7 +26,22 @@ const newResume = ()=>{
         }
         })
 }
+const autoSaveTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 
+// 监听简历内容变化
+watch(
+  () => store.componentList, // 或 resumeList
+  (newVal, oldVal) => {
+    // 有变化时，重置定时器
+    if (autoSaveTimer.value) clearTimeout(autoSaveTimer.value)
+    autoSaveTimer.value = setTimeout(() => {
+      // 这里调用你的保存逻辑
+      saveData(store.componentList, saveResume, resumeStore.currentResumeId,resumeStore.currentResumeTitle)
+      ElMessage.success('已自动保存')
+    }, 30000) // 30秒
+  },
+  { deep: true }
+)
 
 </script>
 
