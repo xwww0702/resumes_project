@@ -206,6 +206,43 @@ const deleteComp = (id:string)=>{
 defineExpose({
     updateComponentData
 })
+
+// 获取全局索引
+const getGlobalIndex = (pageIndex: number, componentIndex: number): number => {
+    let globalIndex = 0
+    for (let i = 0; i < pageIndex; i++) {
+        globalIndex += computedPages.value[i].components.length
+    }
+    return globalIndex + componentIndex
+}
+
+// 上移组件
+const moveComponentUp = (index: number) => {
+    if (index > 0) {
+        const components = [...componentList.value]
+        const temp = components[index]
+        components[index] = components[index - 1]
+        components[index - 1] = temp
+        componentList.value = components
+        nextTick(() => {
+            computePages()
+        })
+    }
+}
+
+// 下移组件
+const moveComponentDown = (index: number) => {
+    if (index < componentList.value.length - 1) {
+        const components = [...componentList.value]
+        const temp = components[index]
+        components[index] = components[index + 1]
+        components[index + 1] = temp
+        componentList.value = components
+        nextTick(() => {
+            computePages()
+        })
+    }
+}
 </script>
 
 <template>
@@ -227,16 +264,16 @@ defineExpose({
         >
             <div class="flex flex-col" ref="resumePagesRef"  id="resume-preview">
                 <div
-                    v-for="(page, index) in computedPages"
-                    :key="index"
-                    class="w-[210mm] h-[297mm] bg-white shadow-lg rounded-lg p-5 box-border relative flex flex-col"
+                    v-for="(page, pageIndex) in computedPages"
+                    :key="pageIndex"
+                    class="w-[210mm] h-[297mm] bg-white shadow-lg rounded-lg p-5 box-border relative flex flex-col mb-6"
                     @drop="handleDrop"
                     @dragover="handleDragOver"
                     @dragleave="handleDragLeave"
                 >
                     <div class="flex-1 flex flex-col">
                         <div
-                            v-for="component in page.components"
+                            v-for="(component, componentIndex) in page.components"
                             :key="component.id"
                             class="relative group"
                             :ref="(el )=> setComponentRef(component.id, el as HTMLElement)"
@@ -258,10 +295,25 @@ defineExpose({
                                 :align ='component.align'
                                 class="cursor-pointer hover:ring-2 hover:ring-blue-500 hover:ring-opacity-50 transition-all duration-200"
                             />
-                            <button 
-                                class="absolute top-2 right-2 w-5 h-5 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-85 hover:opacity-100 hover:bg-red-600 transition-colors flex items-center justify-center text-sm leading-none"
-                                @click.stop="deleteComp(component.id)"
-                            >×</button>
+                            <!-- 操作按钮 -->
+                            <div class="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                <button
+                                  class="w-6 h-6 rounded bg-blue-500 text-white hover:bg-blue-600 transition-colors flex items-center justify-center text-xs"
+                                  @click.stop="moveComponentUp(getGlobalIndex(pageIndex, componentIndex))"
+                                  :disabled="getGlobalIndex(pageIndex, componentIndex) === 0"
+                                  :class="{ 'opacity-50 cursor-not-allowed': getGlobalIndex(pageIndex, componentIndex) === 0 }"
+                                >↑</button>
+                                <button
+                                  class="w-6 h-6 rounded bg-blue-500 text-white hover:bg-blue-600 transition-colors flex items-center justify-center text-xs"
+                                  @click.stop="moveComponentDown(getGlobalIndex(pageIndex, componentIndex))"
+                                  :disabled="getGlobalIndex(pageIndex, componentIndex) === componentList.length - 1"
+                                  :class="{ 'opacity-50 cursor-not-allowed': getGlobalIndex(pageIndex, componentIndex) === componentList.length - 1 }"
+                                >↓</button>
+                                <button
+                                  class="w-6 h-6 rounded bg-red-500 text-white hover:bg-red-600 transition-colors flex items-center justify-center text-xs"
+                                  @click.stop="deleteComp(component.id)"
+                                >×</button>
+                            </div>
                         </div>
                     </div>
                 </div>
