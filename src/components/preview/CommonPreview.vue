@@ -6,6 +6,7 @@ const props = defineProps<{
     type: ResumeComponentType
     fields?: ComponentField[]
     border:boolean
+    showLabel?: boolean
 }>()
 
 const groupedFields = computed(() => {
@@ -22,7 +23,6 @@ const groupedFields = computed(() => {
 
     return Object.values(groups)
 })
-const globalIndex = 1
 </script>
 
 <template>
@@ -36,60 +36,57 @@ const globalIndex = 1
                             :class="[`span-${field.span || 1}`]"
                         >
                             <span class="flex-1 min-w-0 text-gray-700 text-sm leading-relaxed">
-                                <template v-if="field.type === 'text'">
-                                    <template v-if="field.listStyle == 'disc'">
-                                        <ul class= 'list-disc ml-4' >
-                                            <li class="whitespace-pre-wrap leading-relaxed text-gray-800"
-                                                :class="{
-                                                    'font-bold': field.isBold,
-                                                    'italic': field.isItalic
-                                                }"
-                                            >
-                                                {{ field.value || field.placeholder}}
-                                            </li>
-                                        </ul>
-                                    </template>
-                                    <template v-if="field.listStyle === 'none'">
-                                        <div 
-                                            class="whitespace-pre-wrap leading-relaxed text-gray-800"
+                                <span v-if="props.showLabel !== false" class="field-label mr-1">{{ field.label }}</span>
+                                <template v-if="field.type === 'text' && field.listStyle == 'disc'">
+                                    <ul class='list-disc ml-4'>
+                                        <li class="whitespace-pre-wrap leading-relaxed text-gray-800"
                                             :class="{
                                                 'font-bold': field.isBold,
                                                 'italic': field.isItalic
                                             }"
                                         >
                                             {{ field.value || field.placeholder}}
-                                        </div>
-                                    </template>
+                                        </li>
+                                    </ul>
                                 </template>
-                                <template v-if="field.type === 'textarea'">
-                                    <template v-if="field.listStyle !== 'none'">
-                                        <ul :class="{
-                                            'list-disc ml-4': field.listStyle === 'disc',
-                                            'list-decimal ml-4': field.listStyle === 'decimal'
-                                        }" >
-                                            <li class="whitespace-pre-wrap leading-relaxed text-gray-800"
-                                                :class="{
-                                                    'font-bold': field.isBold,
-                                                    'italic': field.isItalic
-                                                }"
-                                            >
-                                                {{ field.value || field.placeholder}}
-                                            </li>
-                                        </ul>
-                                    </template>
-                                    <template v-else>
-                                        <div 
-                                            class="whitespace-pre-wrap leading-relaxed text-gray-800"
+                                <template v-else-if="field.type === 'text'">
+                                    <div 
+                                        class="whitespace-pre-wrap leading-relaxed text-gray-800"
+                                        :class="{
+                                            'font-bold': field.isBold,
+                                            'italic': field.isItalic
+                                        }"
+                                    >
+                                        {{ field.value || field.placeholder}}
+                                    </div>
+                                </template>
+                                <template v-else-if="field.type === 'textarea' && field.listStyle !== 'none'">
+                                    <ul :class="{
+                                        'list-disc ml-4': field.listStyle === 'disc',
+                                        'list-decimal ml-4': field.listStyle === 'decimal'
+                                    }" >
+                                        <li class="whitespace-pre-wrap leading-relaxed text-gray-800"
                                             :class="{
                                                 'font-bold': field.isBold,
                                                 'italic': field.isItalic
                                             }"
                                         >
                                             {{ field.value || field.placeholder}}
-                                        </div>
-                                    </template>
+                                        </li>
+                                    </ul>
                                 </template>
-                                <template v-if="field.type === 'time'">
+                                <template v-else-if="field.type === 'textarea'">
+                                    <div 
+                                        class="whitespace-pre-wrap leading-relaxed text-gray-800"
+                                        :class="{
+                                            'font-bold': field.isBold,
+                                            'italic': field.isItalic
+                                        }"
+                                    >
+                                        {{ field.value || field.placeholder}}
+                                    </div>
+                                </template>
+                                <template v-else-if="field.type === 'time'">
                                     <div class="whitespace-pre-wrap leading-relaxed">
                                         <template v-if="typeof field.value === 'object' && field.value !== null && ('start' in field.value || 'end' in field.value)">
                                             <span>{{ ('start' in field.value ? (field.value as Record<string, any>).start : field.placeholder) }}</span>
