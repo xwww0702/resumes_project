@@ -39,8 +39,8 @@ const getFieldsByRow = (row: number) => {
             :class="getImageAlignment(imageField) === 'right' ? 'right-4' : 'left-4'"
         >
             <img 
-                v-if="imageField.value" 
-                :src="imageField.value" 
+                v-if="typeof imageField.value === 'string' && imageField.value" 
+                :src="typeof imageField.value === 'string' ? imageField.value : undefined" 
                 class="w-full h-full object-cover rounded"
                 alt="个人照片"
             >

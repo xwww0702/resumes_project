@@ -53,6 +53,7 @@ const handleDragStart = (e: DragEvent, component: ResumeComponent) => {
                 <CommonPreview 
                     v-if="(component.type !== 'image-left')&&(component.type !== 'image-right')"
                     :type="component.type"
+                    :border="false"
                     :fields="component.fields"
                     class="bg-white border border-gray-200 rounded-lg shadow-sm hover:border-blue-500 hover:shadow-md transition-all duration-200"
                 />

@@ -5,6 +5,7 @@ import type { ResumeComponentType, ComponentField } from '../../type/Resume'
 const props = defineProps<{
     type: ResumeComponentType
     fields?: ComponentField[]
+    border:boolean
 }>()
 
 const groupedFields = computed(() => {
@@ -24,7 +25,7 @@ const groupedFields = computed(() => {
 </script>
 
 <template>
-    <div class="pl-3 pr-3 rounded-lg bg-white relative">
+    <div class="pl-3 pr-3 rounded-lg bg-white relative" :class="props.border?'border-b border-gray-200':''">
         <div class="text-sm">
             <template v-for="(row, rowIndex) in groupedFields" :key="`row-${rowIndex}-${row.length}`">
                 <div class="preview-row">
@@ -93,9 +94,9 @@ const groupedFields = computed(() => {
                                 <template v-if="field.type === 'time'">
                                     <div class="whitespace-pre-wrap leading-relaxed">
                                         <template v-if="typeof field.value === 'object' && field.value !== null && ('start' in field.value || 'end' in field.value)">
-                                            <span>{{ field.value.start || '至今' }}</span>
-                                            <span v-if="field.value.start && field.value.end"> — </span>
-                                            <span>{{ field.value.end }}</span>
+                                            <span>{{ ('start' in field.value ? (field.value as Record<string, any>).start : field.placeholder) }}</span>
+                                            <span v-if="('start' in field.value && 'end' in field.value && (field.value as Record<string, any>).start && (field.value as Record<string, any>).end)"> — </span>
+                                            <span>{{ ('end' in field.value ? (field.value as Record<string, any>).end : '') }}</span>
                                         </template>
                                         <template v-else>
                                             {{ field.placeholder }}

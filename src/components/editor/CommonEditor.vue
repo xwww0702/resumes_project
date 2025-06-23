@@ -3,6 +3,7 @@ import { ref, watch } from 'vue'
 import type { ResumeComponent, ComponentField } from '../../type/Resume'
 import Layout from './Layout.vue'
 import ContentEditor from './ContentEditor.vue'
+import { useComponentStore } from '../../store/useComponentStore';
 
 const props = defineProps<{
     component: ResumeComponent | null
@@ -15,6 +16,7 @@ const emit = defineEmits<{
 const fieldsConfig = ref<ComponentField[]>([])
 const formData = ref<Record<string, any>>({})
 const formRef = ref()
+const {updateComponentBorder} = useComponentStore()
 
 // 初始化字段配置
 watch(() => props.component?.fields, (newFields) => {
@@ -46,6 +48,13 @@ const handleContentChange = (fieldsConfig: ComponentField[]) => {
     emit('submit', fieldsConfig)
 }
 
+const handleBorder = (val:boolean)=>{
+    if (props.component?.id) {
+        updateComponentBorder(props.component.id, val)
+    }
+    
+}
+
 </script>
 
 <template>
@@ -58,8 +67,10 @@ const handleContentChange = (fieldsConfig: ComponentField[]) => {
             @layout-change="handleLayoutChange"
         />
             <ContentEditor 
+                :border="component?.border||false"
                 :fieldsConfig="fieldsConfig"
                 @submit="handleContentChange"
+                @update:border="handleBorder"
             />
         </div>
 

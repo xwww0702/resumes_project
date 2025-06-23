@@ -239,6 +239,7 @@ defineExpose({
                                 v-if="(component.type !== 'image-left')&&(component.type !== 'image-right')"
                                 :type="component.type"
                                 :fields="component.fields"
+                                :border="component.border||false"
                                 :key="`common-${component.id}`"
                                 class="cursor-pointer hover:ring-2 hover:ring-blue-500 hover:ring-opacity-50 transition-all duration-200"
                             />

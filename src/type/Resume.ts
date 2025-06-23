@@ -31,6 +31,7 @@ export interface ComponentConfig {
     title: string
     description: string
     align?:string
+    border?:boolean
     icon?: string
     // id:string
     defaultFields: ComponentField[]
@@ -51,6 +52,7 @@ export interface ResumeComponent {
     title?: string
     fields?: ComponentField[]
     template?: ComponentConfig
+    border?: boolean
 }
 //简历数据
 export interface ResumeData {

@@ -1,4 +1,3 @@
-import { ref } from 'vue'
 import type { ComponentField } from '../type/Resume'
 
 type EmitType = {

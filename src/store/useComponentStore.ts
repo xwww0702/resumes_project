@@ -25,6 +25,7 @@ export const useComponentStore = defineStore('component', () => {
             type,
             title: config.title,
             align:config.align,
+            border:config.border,
             fields: config.defaultFields.map(field => ({
                 ...field,
                 key: `${field.key}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
@@ -49,6 +50,17 @@ export const useComponentStore = defineStore('component', () => {
             // 2. (关键修复) 同时，用更新后的数据刷新 selectedComponent 副本
             selectedComponent.value = JSON.parse(JSON.stringify(updatedComponent));
         }
+    }
+    function updateComponentBorder(id: string, val:boolean) {
+        const index = componentList.value.findIndex(c => c.id === id)
+        if (index !== -1) {
+            // 1. 合并新旧数据，更新 componentList 中的原始组件
+            componentList.value[index].border = val
+            
+            // 2. (关键修复) 同时，用更新后的数据刷新 selectedComponent 副本
+            selectedComponent.value = JSON.parse(JSON.stringify(componentList.value[index]));
+        }
+        
     }
 
     function removeComponent(id: string) {
@@ -78,7 +90,8 @@ export const useComponentStore = defineStore('component', () => {
         addComponent,
         updateComponent,
         removeComponent,
-        selectComponent
+        selectComponent,
+        updateComponentBorder
     }
 }, {
     persist: true

@@ -19,7 +19,7 @@ const componentConfigs = reactive<Record<ResumeComponentType, ComponentConfig>>(
         defaultFields: [
             { key: 'basic-name', label: 'field1', type: 'text', span: 1, row: 1, placeholder: '请输入内容', value: '' },
             { key: 'basic-age', label: 'field1', type: 'text', span: 1, row: 1, placeholder: '请输入内容', value: '' },
-            { key: 'basic-phone', label: 'field1', type: 'time', span: 1, row: 1, placeholder: '请选择时间', value: {} },
+            { key: 'basic-phone', label: 'field1', type: 'time', span: 1, row: 1, placeholder: '请选择时间', value: { start: '', end: '' } },
         ]
     },
     'image-left': {
@@ -73,7 +73,7 @@ const componentConfigs = reactive<Record<ResumeComponentType, ComponentConfig>>(
         defaultFields: [
             { key: 'content-time-company', label: '公司', type: 'text', span: 1, row: 1, placeholder: '请输入内容', value: '' },
             { key: 'content-time-title', label: '职位', type: 'text', span: 1, row: 1, placeholder: '请输入内容', value: '' },
-            { key: 'content-time-time', label: '时间', type: 'time', span: 1, row: 1, placeholder: '请选择时间', value: {} },
+            { key: 'content-time-time', label: '时间', type: 'time', span: 1, row: 1, placeholder: '请选择时间', value: { } },
             { key: 'content-time-detail1', label: '详情1', type: 'textarea', span: 3, row: 2, placeholder: '请输入内容', value: '' },
             { key: 'content-time-detail2', label: '详情2', type: 'textarea', span: 3, row: 3, placeholder: '请输入内容', value: '' },
             { key: 'content-time-detail3', label: '详情3', type: 'textarea', span: 3, row: 4, placeholder: '请输入内容', value: '' },
@@ -86,7 +86,7 @@ const componentConfigs = reactive<Record<ResumeComponentType, ComponentConfig>>(
         defaultFields: [
             { key: 'education-school', label: '学校', type: 'text', span: 1, row: 1, placeholder: '请输入内容', value: '' },
             { key: 'education-major', label: '专业', type: 'text', span: 1, row: 1, placeholder: '请输入内容', value: '' },
-            { key: 'education-time', label: '时间', type: 'time', span: 1, row: 1, placeholder: '请选择时间', value: {} },
+            { key: 'education-time', label: '时间', type: 'time', span: 1, row: 1, placeholder: '请选择时间', value: { } },
             { key: 'education-type', label: '本科/硕士', type: 'text', span: 1, row: 2, placeholder: '请输入内容', value: '' },
             { key: 'education-grade', label: '成绩', type: 'text', span: 1, row: 2, placeholder: '请输入内容', value: '' },
             { key: 'education-range', label: '排名', type: 'text', span: 1, row: 2, placeholder: '请输入内容', value: '' },
