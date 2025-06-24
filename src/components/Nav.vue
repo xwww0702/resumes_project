@@ -11,7 +11,7 @@ const store = useComponentStore()
 const resumeStore = useResumeStore()
 const { saveResume } = useSaveResume()
 const { createNewResume } = resumeStore
-import {exportPDF} from '../hooks/useExport'
+import {exportPDF,exportJSON} from '../hooks/useExport'
 import { ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 const newResume = ()=>{
@@ -27,7 +27,6 @@ const newResume = ()=>{
         })
 }
 const autoSaveTimer = ref<ReturnType<typeof setTimeout> | null>(null)
-
 // 监听简历内容变化
 watch(
   () => store.componentList, // 或 resumeList
@@ -58,6 +57,9 @@ watch(
             </el-button>
             <el-button type="warning" class="flex items-center" :disabled="!route.query.id" @click="exportPDF">
                 <span>导出 PDF</span>
+            </el-button>
+            <el-button type="warning" class="flex items-center" :disabled="!route.query.id" @click="exportJSON(store.componentList)">
+                <span>导出 JSON</span>
             </el-button>
             <el-button type="warning" class="flex items-center" @click = newResume>
                 <span>新建简历</span>

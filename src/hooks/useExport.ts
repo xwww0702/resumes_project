@@ -1,6 +1,7 @@
 //导出
 import { toBlob } from 'html-to-image'
 import jsPDF from 'jspdf'
+import type { ResumeComponent } from '../type/Resume'
 // import { saveAs } from 'file-saver'
 
 export const exportPDF = async () => {
@@ -33,4 +34,21 @@ export const exportPDF = async () => {
   } catch (err: any) {
     console.error('导出失败:', err)
   }
+}
+
+export const exportJSON = (data:ResumeComponent[]) => {
+  // 获取当前简历内容
+  // 转为 JSON 字符串并格式化
+  const jsonStr = JSON.stringify(data, null, 2)
+  // 创建 Blob
+  const blob = new Blob([jsonStr], { type: 'application/json' })
+  // 创建下载链接
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = ('resume') + '.json'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 }
