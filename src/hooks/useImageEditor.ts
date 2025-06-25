@@ -25,7 +25,7 @@ export function useImageEditor(field: ComponentField) {
 
     const handleCrop = (emit: (value: string) => void) => {
         if (cropperRef.value) {
-            const { coordinates, canvas } = cropperRef.value.getResult()
+            const {  canvas } = cropperRef.value.getResult()
             const croppedImage = canvas.toDataURL()
             emit(croppedImage)
             showCropper.value = false

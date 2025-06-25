@@ -29,8 +29,7 @@ import { useResumeStore } from '../store/useResumeStore'
 import type { ResumeData } from '../type/Resume'
 import router from '../router'
 import { deleteResume } from '../service/request'
-const loading = ref(true)
-const currentDate = new Date().toDateString()
+
 const { fetchData } = userGetAllResume('user123')
 const { resumeList } = toRefs(useResumeStore())
 onMounted( () => {

@@ -3,7 +3,7 @@ import type { ComponentField } from '../../type/Resume'
 import { Cropper } from 'vue-advanced-cropper'
 import 'vue-advanced-cropper/dist/style.css'
 import { useImageEditor } from '../../hooks/useImageEditor'
-import { Upload } from '@element-plus/icons-vue'
+import  Upload  from '../icons/Upload.vue'
 
 interface Props {
     field: ComponentField

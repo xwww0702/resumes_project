@@ -1,6 +1,6 @@
-import { ref, onMounted, onUnmounted } from 'vue'
-import type { ResumeComponent, ComponentField } from '../type/Resume'
-import { saveResumeRequest as saveResumeRequest, getResume,getAllResume } from './request'
+import { ref, onUnmounted } from 'vue'
+import type { ResumeComponent } from '../type/Resume'
+import { saveResumeRequest as saveResumeRequest,getAllResume } from './request'
 
 interface ResumeData {
     id: string

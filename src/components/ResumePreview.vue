@@ -1,9 +1,10 @@
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted, computed, nextTick, watch, type DefineProps } from 'vue'
+import { ref, onMounted, onUnmounted, computed, nextTick, watch } from 'vue'
 import type { ResumeComponent, ResumeData } from '../type/Resume'
 import CommonPreview from './preview/CommonPreview.vue'
 import ImagePreview from './preview/ImagePreview.vue'
-import { ZoomOut, ZoomIn } from '@element-plus/icons-vue'
+import ZoomOut from './icons/ZoomOut.vue'
+import ZoomIn from './icons/ZoomIn.vue'
 import { useComponentStore } from '../store/useComponentStore'
 import { handleWheel, zoomOut, zoomIn, resetZoom, scale, minScale, maxScale } from '../hooks/useZooms'
 import throttle from 'lodash/throttle'
@@ -17,7 +18,6 @@ const resumeStore = useResumeStore()
 import router from '../router'
 const componentData = new Map<string, any>()
 
-const {createNewResume} = useResumeStore()
 // 定义页面类型
 interface ResumePage {
     components: ResumeComponent[]

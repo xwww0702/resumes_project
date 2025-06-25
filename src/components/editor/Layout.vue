@@ -1,6 +1,6 @@
 <script setup lang='ts' >
 import type { ComponentField } from '../../type/Resume'
-import { InfoFilled } from '@element-plus/icons-vue'
+import  InfoFilled from '../icons/InfoFilled.vue'
 
 const props = defineProps<{
     fieldsConfig: ComponentField[]

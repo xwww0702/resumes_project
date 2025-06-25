@@ -34,15 +34,14 @@
             </div>
         </div>
         <el-button type="primary" @click="addField" class="add-field-btn">添加字段</el-button>
-        <el-button type="primary" @click="saveField" class="add-field-btn">保存至组件市场</el-button>
+        <!-- <el-button type="primary" @click="saveField" class="add-field-btn">保存至组件市场</el-button> -->
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import type { ComponentField } from '../../type/Resume'
-import { saveComponentTemplate } from '../../service/request'
-import { ElMessage } from 'element-plus'
+// import { saveComponentTemplate } from '../../service/request'
 
 // const props = defineProps<{
 //     modelValue: ComponentField[]
@@ -80,22 +79,22 @@ const addField = () => {
 const removeField = (index: number) => {
     defaultFields.value.splice(index, 1)
 }
-const saveField = async () => {
-  try {
-    await saveComponentTemplate({
+// const saveField = async () => {
+//   try {
+//     await saveComponentTemplate({
         
-        defaultFields:defaultFields.value,
-        type:'user',
-        title:'userConfig',
+//         defaultFields:defaultFields.value,
+//         type:'user',
+//         title:'userConfig',
     
     
-    })
-    ElMessage.success('保存成功')
-    defaultFields.value = []
-  } catch (e) {
-    ElMessage.error('保存失败')
-  }
-}
+//     })
+//     ElMessage.success('保存成功')
+//     defaultFields.value = []
+//   } catch (e) {
+//     ElMessage.error('保存失败')
+//   }
+// }
 </script>
 
 <style scoped>

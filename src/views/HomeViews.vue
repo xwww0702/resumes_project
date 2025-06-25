@@ -1,13 +1,10 @@
 <script lang='ts' setup>
 import ResumeCompPart from '../components/ResumeCompPart.vue'
 import ResumePreview from '../components/ResumePreview.vue'
-import { useComponentStore } from '../store/useComponentStore'
 import { ref } from 'vue'
-import type { ResumeComponent } from '../type/Resume'
 import Title from '../components/Title.vue'
 const asideWidth = ref(500)
 const previewRef = ref()
-const store = useComponentStore()
    const compPartRef = ref()
 const handleComponentDeleted = () => {
     console.log(11);

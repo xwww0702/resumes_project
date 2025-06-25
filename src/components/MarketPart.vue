@@ -5,9 +5,9 @@ import CommonPreview from './preview/CommonPreview.vue'
 import componentConfigs from '../config/componentConfigs'
 import { computed } from 'vue'
 
-const emit = defineEmits<{
-    (e: 'select', component: ResumeComponent): void
-}>()
+// const emit = defineEmits<{
+//     (e: 'select', component: ResumeComponent): void
+// }>()
 
 // const store = useComponentStore()
 

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import {  computed, watch, onMounted } from 'vue'
 import type { ResumeComponent } from '../type/Resume'
 import EditPart from './EditPart.vue'
 import MarketPart from './MarketPart.vue'

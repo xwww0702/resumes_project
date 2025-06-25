@@ -15,7 +15,6 @@ const emit = defineEmits<{
 
 const fieldsConfig = ref<ComponentField[]>([])
 const formData = ref<Record<string, any>>({})
-const formRef = ref()
 const {updateComponentBorder} = useComponentStore()
 
 // 初始化字段配置

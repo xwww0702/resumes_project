@@ -30,7 +30,7 @@ const autoSaveTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 // 监听简历内容变化
 watch(
   () => store.componentList, // 或 resumeList
-  (newVal, oldVal) => {
+  () => {
     // 有变化时，重置定时器
     if (autoSaveTimer.value) clearTimeout(autoSaveTimer.value)
     autoSaveTimer.value = setTimeout(() => {

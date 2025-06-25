@@ -7,7 +7,7 @@ const title = ref('')
 const store  = useResumeStore()
 watch(
   () => route.query.title,
-  (newtitle) => {
+  () => {
     // 只在有简历时同步标题
     store.currentResumeTitle = route.query.title as string
     if (route.query.id) {

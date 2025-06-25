@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
-import type { ComponentField, ResumeComponentType } from '../../type/Resume'
+import type { ComponentField } from '../../type/Resume'
 
 const props = withDefaults(defineProps<{
     type: string
@@ -18,7 +18,7 @@ const textFields = computed(() => {
     return props.fields?.filter(field => field.type !== 'image') || []
 })
 
-const getImageAlignment = (field: ComponentField | undefined) => {
+const getImageAlignment = () => {
     return props.align || 'left'
 }
 
@@ -36,7 +36,7 @@ const getFieldsByRow = (row: number) => {
         <div 
             v-if="imageField"
             class="absolute top-0 w-[90px] h-[120px] overflow-hidden rounded shadow-sm transition-all duration-200 bg-gray-50 hover:shadow z-10"
-            :class="getImageAlignment(imageField) === 'right' ? 'right-4' : 'left-4'"
+            :class="getImageAlignment() === 'right' ? 'right-4' : 'left-4'"
         >
             <img 
                 v-if="typeof imageField.value === 'string' && imageField.value" 
@@ -51,7 +51,7 @@ const getFieldsByRow = (row: number) => {
 
         <div 
             class="absolute bottom-4"
-            :class="getImageAlignment(imageField) === 'right' ? 'left-4 right-[140px]' : 'left-[140px] right-4'"
+            :class="getImageAlignment() === 'right' ? 'left-4 right-[140px]' : 'left-[140px] right-4'"
         >
             <div 
                 v-for="row in getMaxRow()" 

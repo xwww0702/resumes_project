@@ -1,7 +1,5 @@
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
 import type { ComponentField } from '../type/Resume'
-import componentConfigs from '../config/componentConfigs'
 import { useComponentStore } from '../store/useComponentStore'
 import { storeToRefs } from 'pinia'
 import CommonEditor from './editor/CommonEditor.vue'
@@ -11,10 +9,10 @@ const store = useComponentStore()
 const { selectedComponent } = storeToRefs(store)
 
 // 获取当前组件的编辑器配置
-const currentConfig = computed(() => {
-    if (!selectedComponent.value) return null
-    return componentConfigs[selectedComponent.value.type]
-})
+// const currentConfig = computed(() => {
+//     if (!selectedComponent.value) return null
+//     return componentConfigs[selectedComponent.value.type]
+// })
 
 
 // 处理表单提交 需要做防抖处理

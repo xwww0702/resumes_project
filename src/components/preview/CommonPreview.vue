@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 import type { ResumeComponentType, ComponentField } from '../../type/Resume'
 
 const props = defineProps<{
@@ -28,7 +28,7 @@ const groupedFields = computed(() => {
 <template>
     <div class="pl-3 pr-3  bg-white relative" :class="props.border?'border-b border-gray-200':''">
         <div class="text-sm">
-            <template v-for="(row, rowIndex) in groupedFields" :key="`row-${rowIndex}-${row.length}`">
+            <template v-for="(row) in groupedFields" :key="`row-${rowIndex}-${row.length}`">
                 <div class="preview-row">
                     <template v-for="field in row" :key="`field-${field.key}-${field.row}-${field.span}`">
                         <div 

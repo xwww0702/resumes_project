@@ -2,8 +2,7 @@
 import type { ComponentField } from '../../type/Resume'
 import { useStyleChange } from '../../hooks/useStyleChange'
 import ImageEditor from './ImageEditor.vue'
-import { Brush } from '@element-plus/icons-vue'
-import { ref } from 'vue'
+import  Brush  from '../icons/Brush.vue'
 
 const props = defineProps<{
     fieldsConfig: ComponentField[],
@@ -41,8 +40,6 @@ const handleImageUpdate = (field: ComponentField, value: string) => {
     emit('submit', props.fieldsConfig)
 }
 
-// 新增：下边框开关
-const showBorder = ref(true)
 
 </script>
 
@@ -56,7 +53,7 @@ const showBorder = ref(true)
             class="mb-4"
         />
         <div class="editor-form" :class="{ 'border-b': border }">
-            <div v-for="(field,index) in fieldsConfig" :key="field.key" class="field-item">
+            <div v-for="(field) in fieldsConfig" :key="field.key" class="field-item">
                 <div class="field-header">
                     <span class="field-label">{{ field.label }}</span>
                     <div class="style-controls" v-if="field.type === 'text' || field.type === 'textarea'">

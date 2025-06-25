@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
-import type { ResumeComponent, ResumeData } from '../type/Resume'
+import type {  ResumeData } from '../type/Resume'
 
 export const useResumeStore = defineStore('resume', () => {
     const currentResumeId = ref('')
