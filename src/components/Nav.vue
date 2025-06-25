@@ -25,6 +25,7 @@ const newResume = ()=>{
             title: '未命名简历'
         }
         })
+        store.componentList = []
 }
 const autoSaveTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 // 监听简历内容变化
