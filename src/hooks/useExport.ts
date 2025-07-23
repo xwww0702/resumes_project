@@ -1,11 +1,14 @@
 //导出
-import { toBlob } from 'html-to-image'
-import jsPDF from 'jspdf'
 import type { ResumeComponent } from '../type/Resume'
 // import { saveAs } from 'file-saver'
 
 export const exportPDF = async () => {
   try {
+    const [{ toBlob }, { default: jsPDF }] = await Promise.all([
+      import('html-to-image'),
+      import('jspdf')
+    ])
+
     const container = document.getElementById('resume-preview')!
     
     // 生成图片 Blob
