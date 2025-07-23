@@ -1,3 +1,4 @@
+const compression = require('compression')
 const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
@@ -20,6 +21,7 @@ app.use(cors({ origin: function (origin, callback) {
     }, credentials: true }));
 // app.use(express.json())
 app.use(express.json({ limit: '10mb' }))
+app.use(compression())
 app.use(express.urlencoded({ limit: '10mb', extended: true }))
 
 // 数据库连接
