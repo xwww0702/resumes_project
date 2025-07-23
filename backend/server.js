@@ -3,11 +3,12 @@ const mongoose = require('mongoose')
 const cors = require('cors')
 const app = express()
 const allowedOrigins = [
-  'https://resumes-project.vercel.app/',
+  'https://resumes-project.vercel.app',
   'http://localhost:5173'
 ]
 // 中间件
 app.use(cors({ origin: function (origin, callback) {
+  console.log("Origin received:", origin);
       // 如果请求无 origin（如 curl 或 Postman），允许
       if (!origin) return callback(null, true);
 
