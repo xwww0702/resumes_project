@@ -2,9 +2,21 @@ const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
 const app = express()
-
+const allowedOrigins = [
+  'https://resumes-project.vercel.app/',
+  'http://localhost:5173'
+]
 // 中间件
-app.use(cors())
+app.use(cors({ origin: function (origin, callback) {
+      // 如果请求无 origin（如 curl 或 Postman），允许
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true); // ✅ 允许
+      } else {
+        callback(new Error('Not allowed by CORS')); // ❌ 拒绝
+      }
+    }, credentials: true }));
 // app.use(express.json())
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ limit: '10mb', extended: true }))
